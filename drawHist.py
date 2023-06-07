@@ -1,0 +1,30 @@
+import ROOT
+import os
+
+run = input("Which run?")
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/newhistFiles/'
+
+f1 = ROOT.TFile.Open(directory+'histCICADA_run'+ run +'.root', 'READ')
+f2 = ROOT.TFile.Open(directory+'histCS_run'+ run +'.root', 'READ')
+f3 = ROOT.TFile.Open(directory+'histCS2_run'+ run +'.root', 'READ')
+
+canvas1 = ROOT.TCanvas('canvas1', '', 500, 500)
+hist1 = f1.Get('histCICADA_run'+run)
+hist1.Draw()
+canvas1.Draw()
+canvas1.SaveAs("hCICADArun"+ run + ".png")
+print("Image 1 Saved.")
+
+canvas2 = ROOT.TCanvas('canvas2', '', 500, 500)
+hist2 = f2.Get('histCS_run'+run) 
+hist2.Draw()
+canvas2.Draw()
+canvas2.SaveAs("hCSrun"+ run + ".png")
+print("Image 2 Saved.")
+
+canvas3 = ROOT.TCanvas('canvas3', '', 500, 500)
+hist3 = f3.Get('histCS2_run'+run) 
+hist3.Draw()
+canvas3.Draw()
+canvas3.SaveAs("hCS2run"+ run + ".png")
+print("Image 3 Saved.")
