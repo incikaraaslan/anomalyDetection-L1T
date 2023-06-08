@@ -33,7 +33,8 @@ lineColors = np.asarray([46, 30, 38, 40])
 black = 1
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
 canvas.SetLogx()
-leg = ROOT.TLegend(0.7, 0.75, 0.87, 0.87)
+canvas.SetLogy()
+leg = ROOT.TLegend(0.13, 0.15, 0.30, 0.27)
 leg.SetBorderSize(1)
 leg.SetFillColor(0)
 leg.SetFillStyle(2)
@@ -54,17 +55,18 @@ for i in tqdm(range(4)):
         efficiencyHist = ROOT.TH1F("Run "+runs[i]+" Efficiency", "Run "+runs[i]+" Efficiency", nBins, 0.01, 1.0)
     
     # Iterate through X Bins for each histogram
+    zeroBiasRate = 28609 # in kHz
     for j in tqdm(range(nBins)):
         e = hists[i].GetBinContent(j)
         total = hists[i].Integral()
         above_t= hists[i].Integral(nBins-j, nBins)
-        perc = above_t/total
+        perc = above_t/total * zeroBiasRate
         efficiencyHist.SetBinContent(nBins-j, perc)
     efficiencyHist.SetLineColor(int(lineColors[i]))
     efficiencyHist.SetMarkerColor(int(lineColors[i]))
     efficiencyHist.SetTitle("")
     efficiencyHist.GetXaxis().SetTitle(listofPlots[str(selectPlot)]+" Threshold")
-    efficiencyHist.GetYaxis().SetTitle("Efficiency")
+    efficiencyHist.GetYaxis().SetTitle("L1 Trigger Rate (kHz)")
     efficiencyHist.SetMarkerStyle(8)
     efficiencyHist.SetMarkerSize(0.5)
     efficiencyHist.GetXaxis().SetTitleSize(0.035)
@@ -85,5 +87,5 @@ for i in tqdm(range(4)):
 
 leg.Draw()
 canvas.Draw()
-canvas.SaveAs(a+'efficiency.png')
+canvas.SaveAs(a+'rate.png')
 
