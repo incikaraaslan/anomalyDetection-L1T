@@ -1,0 +1,19 @@
+import ROOT
+from tqdm import tqdm
+import os
+import prepChains as pc
+
+runs = ["B", "C", "D"]
+
+for i in tqdm(range(3)):
+    directory = "/hdfs/store/user/aloeliger/uGTComparisons/v_2/Run"+runs[i]+"/" 
+    chains = pc.prepChains(directory)
+    h1run = ROOT.TH1F("Run"+runs[i]+" H1", "anomalyScore", 100, 0.0, 10.0)
+    for j in tqdm(range(chains['anomalyChain'].GetEntries())):
+        chains['anomalyChain'].GetEntry(j)
+        a = chains['anomalyChain'].anomalyScore
+        h1run.Fill(a)
+    hist1F = ROOT.TFile("histCICADA_run"+runs[i]+".root", "CREATE")
+    hist1F.WriteObject(h1run, "histCICADA_run"+runs[i])
+    hist1F.Draw()
+    print("Histogram for Run"+runs[i]+" Created.")

@@ -1,0 +1,32 @@
+import ROOT
+from tqdm import tqdm
+import os
+import prepChains as pc
+
+run = inp = "/hdfs/store/user/aloeliger/uGTComparisons/v_2/RunA/" 
+chains = pc.prepChains(directory)
+
+h1run = ROOT.TH1F("RunA H1", "anomalyScore", 100, 0.0, 10.0)
+h2run = ROOT.TH1F("RunA H2", "anomalyScore/pileupPrediction", 100, 0.0, 1.0)
+h3run = ROOT.TH1F("RunA H3", "anomalyScore/pileupPrediction^2", 100, 0.0, 1.0)
+
+for i in tqdm(range(chains['anomalyChain'].GetEntries())):
+    chains['anomalyChain'].GetEntry(i)
+    chains['PUChain'].GetEntry(i)
+    a = chains['anomalyChain'].anomalyScore
+    b = a / chains['PUChain'].pileupPrediction
+    c = a / (chains['PUChain'].pileupPrediction)**2
+    h1run.Fill(a)
+    h2run.Fill(b)
+    h3run.Fill(c)
+    
+
+hist1F = ROOT.TFile("hist1_runA.root", "CREATE")
+hist2F = ROOT.TFile("hist2_runA.root", "CREATE")
+hist3F = ROOT.TFile("hist3_runA.root", "CREATE")
+hist1F.WriteObject(h1run, "hist1_runA")
+print("Histogram 1 Created.") 
+hist2F.WriteObject(h2run, "hist2_runA")
+print("Histogram 2 Created.")  
+hist3F.WriteObject(h3run, "hist3_runA") 
+print("Histogram 3 Created.") 
