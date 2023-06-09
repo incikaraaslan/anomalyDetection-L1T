@@ -1,0 +1,19 @@
+import ROOT
+
+print('ROOT version {ROOT.__version__}')
+
+import random
+
+theFile = ROOT.TFile.Open("~/hdfs/store/user/aloeliger/uGTComparisons/v_2/RunA/emulateCompleteL1_cff-0021810B-9F4B-E811-AE46-FA163EBE2FBA.root")
+
+
+theFile.ls()
+theDirectory = theFile.L1TCaloSummaryTestNTuplizer
+theTree = theDirectory.L1TCaloSummaryOutput
+print(theTree)
+
+theHistogram = ROOT.TH1F("histogram", "histogram", 100, 0.0, 60.0)
+for i in range(theTree.GetEntries()):
+    theTree.GetEntry(i)
+    print(i)
+    print(theTree.anomalyScore)
