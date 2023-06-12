@@ -7,7 +7,7 @@ from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 import math
 
-# Read files from Andrew's large files
+# Read files from Andrew's large file
 directory = '/hdfs/store/user/aloeliger/largeInputFile_manyInput_CICADAv2.hdf5'
 f = h5py.File(directory, 'r')
 cicadaInput = f['cicadaInput'][:100000] # len() -> 32316864
@@ -66,3 +66,32 @@ print(p2, med_arr, s2)
 print(math.sqrt(mean_squared_error(p2, pileup_test)))
 
 print(f"first event: {cicada_test[0]} {pileup_test[0]} {dummy_regr2.predict(cicada_test[0])}")
+
+### RESULTS: ###
+"""
+(80000, 1, 252)
+(80000, 1)
+
+MEAN:
+[29.733376 29.733376 29.733376 ... 29.733376 29.733376 29.733376] [29.72625 29.72625 29.72625 ... 29.72625 29.72625 29.72625] 0.0
+8.102095966193572
+
+MEDIAN:
+[29. 29. 29. ... 29. 29. 29.] [29. 29. 29. ... 29. 29. 29.] 1.0
+8.13457734438473
+
+first event: [[ 0.  0.  0.  1.  5.  0.  1.  1.  1.  2.  2.  0.  2.  0.  1.  0.  0.  0.
+  14.  7.  2.  3.  1.  1.  2.  0.  0.  0.  3.  1.  1.  0.  1.  1.  1.  2.
+   1.  0.  4.  0.  2.  0.  1.  3.  0.  2.  2.  1.  1.  5.  3.  2.  0.  0.
+   0.  0.  2.  1.  0.  2.  1.  3.  2.  3. 10.  0.  7.  0.  2.  0.  0.  0.
+   0.  3.  2.  3.  4.  3.  0.  0.  0.  0.  0.  0.  7.  0.  0.  2.  2.  7.
+   4.  3.  2.  1.  0.  0.  1.  0.  0.  1.  3.  2.  3.  0.  0.  5.  2.  0.
+   4.  0.  1.  0.  2.  0.  1.  2.  0.  2. 11.  2.  1.  0.  0.  1.  2.  0.
+   3.  1.  1.  1.  2.  2.  4.  3. 16.  0.  0.  1.  0.  0.  6.  0.  0.  0.
+   1.  3.  4.  0.  1.  3.  3.  0.  2.  0.  3.  2.  0.  4.  2.  1.  4.  1.
+   1.  1.  0.  0.  0.  0.  0.  0.  0.  5.  2.  1.  2.  8.  4.  0.  0.  0.
+   0.  0.  0.  0.  0.  2.  1.  1.  2.  4.  4.  0.  1.  0.  0.  1.  0.  0.
+   0.  0.  2.  1.  6.  3.  7.  2. 17.  0.  0.  0.  0.  1.  0.  4.  0.  4.
+   4.  2.  0.  1. 10.  0.  0.  2.  0.  2.  0.  0.  1.  2.  1.  3.  2.  2.
+   4.  0.  2.  0.  2.  0.  0.  5.  5.  1.  3.  6.  0.  0.  4.  0.  0.  0.]] [16.] [29.]
+"""
