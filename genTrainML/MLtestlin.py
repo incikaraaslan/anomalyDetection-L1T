@@ -24,7 +24,7 @@ p = lin_regr.predict(cicada_test)
 print("Mean:" + str(np.mean(pileup_test))+ " , Predicted Mean: " + str(np.mean(p)))
 print("Median:" + str(np.median(pileup_test))+ " , Predicted Median: " + str(np.median(p)))
 print("Total Prediction MSE: " + str(math.sqrt(mean_squared_error(p, pileup_test))))
-
+print("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(p, pileup_test, squared = False))))
 #### Larger Data Sizes ####
 ### 1000000 Entries ###
 """

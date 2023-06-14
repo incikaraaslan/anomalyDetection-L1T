@@ -35,7 +35,7 @@ s = dummy_regr.score(cicada_test, mean_arr)
 # mse = sklearn.metrics.mean_squared_error(cicada_test, mean_arr)
 # rmse = sklearn.metrics.mean_squared_error(cicada_test, mean_arr, squared = False)
 print(p, mean_arr, s)
-print(math.sqrt(mean_squared_error(p, pileup_test)))
+print(math.sqrt(mean_squared_error(p, pileup_test, squared = False)))
 # print(mse, rmse)
 # [29.718613 ... 29.718613] [29.7853 ... 29.7853] 0.0
 
@@ -63,7 +63,7 @@ s2 = dummy_regr2.score(cicada_test, med_arr)
 # [29. 29. 29. ... 29. 29. 29.] [29. 29. 29. ... 29. 29. 29.] 1.0
 
 print(p2, med_arr, s2)
-print(math.sqrt(mean_squared_error(p2, pileup_test)))
+print(math.sqrt(mean_squared_error(p2, pileup_test, squared=False)))
 
 print(f"first event: {cicada_test[0]} {pileup_test[0]} {dummy_regr2.predict(cicada_test[0])}")
 
