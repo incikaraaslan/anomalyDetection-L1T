@@ -62,7 +62,7 @@ for i in tqdm(range(3)):
     hist.SetLineColor(int(lineColors[i]))
     hist.SetMarkerColor(int(lineColors[i]))
     hist.SetMarkerStyle(8)
-    hist.SetMarkerSize(0.5)
+    hist.SetMarkerSize(0.2)
     hist.SetTitle("")
     hist.GetXaxis().SetTitle("CICADA Threshold")
     hist.GetXaxis().SetTitleSize(0.045)
@@ -70,17 +70,17 @@ for i in tqdm(range(3)):
     hist.GetYaxis().SetTitleSize(0.045)
     hist.GetYaxis().SetTitleOffset(0.9)
     #xMax = hist.GetXaxis().GetXmax() * 1.75
-    yMax = hist.GetMaximum() * 1.25
+    yMax = hist.GetMaximum()
     hist.SetMaximum(yMax)
     #hist.GetXaxis().SetLimits(1, xMax)
-    hist.SetMinimum(0.1)
+    hist.SetMinimum(0)
     hists.append(hist)
 
     
     hist2.SetLineColor(int(lineColors2[i]))
     hist2.SetMarkerColor(int(lineColors2[i]))
     hist2.SetMarkerStyle(8)
-    hist2.SetMarkerSize(0.5)
+    hist2.SetMarkerSize(0.2)
     hist2.SetTitle("")
     hist2.GetXaxis().SetTitle("CICADA Threshold")
     hist2.GetXaxis().SetTitleSize(0.045)
@@ -88,24 +88,28 @@ for i in tqdm(range(3)):
     hist2.GetYaxis().SetTitleSize(0.045)
     hist2.GetYaxis().SetTitleOffset(0.9)
     #xMax = hist.GetXaxis().GetXmax() * 1.75
-    yMax2 = hist2.GetMaximum() * 1.25
+    yMax2 = hist2.GetMaximum()
     hist2.SetMaximum(yMax2)
     #hist.GetXaxis().SetLimits(1, xMax)
-    hist2.SetMinimum(0.1)
+    hist2.SetMinimum(0)
     hists2.append(hist2)
-
-
-    hists[i].GetXaxis().SetRangeUser(0.01,1.0)
-    hists2[i].GetXaxis().SetRangeUser(0.01,1.0)
+    
+    # hists.append(hist2)
+    hists[i].GetXaxis().SetRangeUser(0.01,10.0)
+    hists2[i].GetXaxis().SetRangeUser(0.01,10.0)
 
     if i == 0:
         print("First Histogram")
         hists[i].Draw("E1")
+        # hists[i].Draw("HIST")
         hists2[i].Draw("SAME E1")
+        # hists2[i].Draw("SAME HIST")
     else:
         print("Duplicate Histograms")
         hists[i].Draw("SAME E1")
+        # hists[i].Draw("SAME HIST")
         hists2[i].Draw("SAME E1")
+        # hists2[i].Draw("SAME HIST")
     leg.AddEntry(hists[i], "True Run " + runs[i], "l")
     leg.AddEntry(hists2[i], "Predicted Run " + runs[i], "l")
 
