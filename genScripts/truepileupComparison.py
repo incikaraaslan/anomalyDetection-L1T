@@ -19,8 +19,8 @@ for i in range(len(run_list)):
 
 # Creating the Histograms
 canvas = ROOT.TCanvas()
-hPileup = ROOT.TH1F("PileupRun_"+run, "True Pileup", 100, 0.0, 10.0)
-hPrediction = ROOT.TH1F("PredRun_"+run, "Prediction", 100, 0.0, 10.0)
+hPileup = ROOT.TH1F("pRun_"+run, "True Pileup", 100, 0.0, 10.0)
+hPrediction = ROOT.TH1F("ppredRun_"+run, "Prediction", 100, 0.0, 10.0)
 
 for i in tqdm(range(chains['anomalyChain'].GetEntries())):
     chains['anomalyChain'].GetEntry(i)
@@ -30,9 +30,9 @@ for i in tqdm(range(chains['anomalyChain'].GetEntries())):
     hPileup.Fill(truePileup)
     hPrediction.Fill(predictedPileup)
 
-hPileup = ROOT.TFile("histPileup_run"+run+".root", "CREATE")
-hPrediction = ROOT.TFile("histPileupPrediction_run"+run+".root", "CREATE")
-hPileup.WriteObject(hPileup, "histPileup_run"+run)
+fPileup = ROOT.TFile("histPileup_run"+run+".root", "CREATE")
+fPrediction = ROOT.TFile("histPileupPred_run"+run+".root", "CREATE")
+fPileup.WriteObject(hPileup, "histPileup_run"+run)
 print("Histogram 1 Created.") 
-hPrediction.WriteObject(hPrediction, "histPileupPrediction_run"+run)
+fPrediction.WriteObject(hPrediction, "histPileupPred_run"+run)
 print("Histogram 2 Created.")
