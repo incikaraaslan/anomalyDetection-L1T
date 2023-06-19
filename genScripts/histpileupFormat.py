@@ -11,10 +11,10 @@ lineColors2 = np.asarray([45, 31, 37])
 black = 1
 ROOT.gStyle.SetOptStat(False)
  
-o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/newhistFiles/"
+o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/" # newhistFiles/
 a = "histPileup_run"
 b = "histPred_run"
-b2 = "histPileupPred_run"
+# b2 = "histPileupPred_run"
 c = "histPredPileup_run"
 
 
@@ -32,7 +32,7 @@ hists3 = []
 
 canvas = ROOT.TCanvas('C', 'Canvas', 500, 500)
 
-pileupPad = ROOT.TPad("Pad 1", "Pad 1", 0, 0.5, 0.5, 1.0)
+pileupPad = ROOT.TPad("Pad 1", "Pad 1", 0, 0.33, 0.5, 1.0)
 pileupPad.SetLogy()
 # canvas.SetLogx()
 # pileg = pileupPad.BuildLegend()
@@ -43,7 +43,7 @@ pileg.SetTextFont(40)"""
 pileupPad.Draw()
 
 canvas.cd()
-predictionPad = ROOT.TPad("Pad 2", "Pad 2", 0.5, 0.5, 1.0, 1.0)
+predictionPad = ROOT.TPad("Pad 2", "Pad 2", 0.5, 0.33, 1.0, 1.0)
 predictionPad.SetLogy()
 # predleg = predictionPad.BuildLegend()
 """predleg.SetBorderSize(1)
@@ -53,7 +53,7 @@ predleg.SetTextFont(40)"""
 predictionPad.Draw()
 
 canvas.cd()
-predvpileupPad = ROOT.TPad("Pad 3", "Pad 3", 0, 0, 1, 0.5)
+predvpileupPad = ROOT.TPad("Pad 3", "Pad 3", 0, 0, 1, 0.33)
 predvpileupPad.SetLogy()
 # ppleg = predvpileupPad.BuildLegend()
 """ppleg.SetBorderSize(1)
@@ -69,7 +69,8 @@ leg.SetBorderSize(1)
 leg.SetFillColor(0)
 leg.SetFillStyle(2)
 leg.SetTextFont(40)"""
-
+# get max of all hists and get the max, set the hist to that max
+# cut 0 pileup, cut it down to about a third.
 for i in tqdm(range(3)):
 
     # Take from each file
@@ -80,7 +81,7 @@ for i in tqdm(range(3)):
     
     f2 = ROOT.TFile.Open(flist2[i], 'READ')
     openfiles2.append(f2)
-    hist2 = f2.Get(b2+runs[i])
+    hist2 = f2.Get(b+runs[i])
     hist2.SetName("Run " + runs[i])
 
     f3 = ROOT.TFile.Open(flist3[i], 'READ')
@@ -105,7 +106,7 @@ for i in tqdm(range(3)):
     #hist.GetXaxis().SetLimits(1, xMax)
     yMin = hist.GetMinimum() * 1.75
     if yMin == 0:
-        hist.SetMinimum(0.01)
+        hist.SetMinimum(1)
     else:
         hist.SetMinimum(yMin)
     hists.append(hist)
@@ -128,7 +129,7 @@ for i in tqdm(range(3)):
     #hist.GetXaxis().SetLimits(1, xMax)
     yMin2 = hist.GetMinimum() * 1.75
     if yMin2 == 0:
-        hist2.SetMinimum(0.01)
+        hist2.SetMinimum(1)
     else:
         hist2.SetMinimum(yMin2)
     hists2.append(hist2)
@@ -150,7 +151,7 @@ for i in tqdm(range(3)):
     #hist.GetXaxis().SetLimits(1, xMax)
     yMin3 = hist.GetMinimum() * 1.75
     if yMin3 == 0:
-        hist3.SetMinimum(0.01)
+        hist3.SetMinimum(1)
     else:
         hist3.SetMinimum(yMin3)
     hists3.append(hist3)
@@ -225,4 +226,4 @@ pileg = pileupPad.BuildLegend(0.7, 0.25, 0.87, 0.37)
 pileg.Draw()
 
 canvas.Draw()
-canvas.SaveAs('SNAILPileup.png')
+canvas.SaveAs('SNAILPileupnew.png')

@@ -3,6 +3,7 @@ from tqdm import tqdm
 import os
 import prepChains as pc
 import numpy as np
+import math
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -19,15 +20,15 @@ for i in range(len(run_list)):
 
 # Creating the Histograms
 canvas = ROOT.TCanvas()
-hPileup = ROOT.TH1F("pRun_"+run, "True Pileup", 100, 0.0, 10.0)
-hPrediction = ROOT.TH1F("ppredRun_"+run, "Prediction", 100, 0.0, 10.0)
-hPileupvPrediction = ROOT.TH1F("pvpredRun_"+run, "Prediction/True Pileup", 100, 0.0, 10.0)
+hPileup = ROOT.TH1F("pRun_"+run, "True Pileup", 80, 0.0, 80.0)
+hPrediction = ROOT.TH1F("ppredRun_"+run, "Prediction", 80, 0.0, 80.0)
+hPileupvPrediction = ROOT.TH1F("pvpredRun_"+run, "Prediction/True Pileup", 80, 0.0, 80.0)
 
 for i in tqdm(range(chains['anomalyChain'].GetEntries())):
     chains['anomalyChain'].GetEntry(i)
     chains['PUChain'].GetEntry(i)
     truePileup = chains['anomalyChain'].npv
-    predictedPileup = chains['PUChain'].pileupPrediction
+    predictedPileup = math.floor(chains['PUChain'].pileupPrediction) # round down to int
     hPileupvPrediction.Fill(predictedPileup/truePileup)
     hPileup.Fill(truePileup)
     hPrediction.Fill(predictedPileup)
