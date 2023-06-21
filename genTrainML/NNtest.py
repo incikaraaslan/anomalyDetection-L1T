@@ -15,6 +15,9 @@ cicadaInput = cicadaInput.reshape(-1, 18, 14, 1)
 pileup = f['pileup'][:1000000] # len() -> 32316864
 f.close()
 
+# split train data to validation and main training
+# take a look at train v validation from the metric. Overfitting check -- employ regularization if overfitting. 70-20-10
+
 # Split Data
 cicada_train, cicada_test, pileup_train, pileup_test = skms.train_test_split(cicadaInput, pileup, test_size=0.20, random_state =1234)
 print(cicada_train.shape, pileup_train.shape)
@@ -36,7 +39,12 @@ model = tf.keras.Sequential(
 model.compile(loss = "mean_squared_error", metrics = ["RootMeanSquaredError"])
 
 # Training Model
-trainHistory = model.fit(cicada_train, pileup_train, batch_size = 32, epochs = 10)
+trainHistory = model.fit(
+    cicada_train, 
+    pileup_train, 
+    batch_size = 32, 
+    epochs = 10
+)
 
 # Quick Learning Curve and Gen Error testing
 """pd.DataFrame(trainHistory.history).plot(figsize = (8,5), grid = True, xlabel = "Epoch", style = ["r--", "r--", "b-", "b-*"])
