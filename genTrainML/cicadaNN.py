@@ -56,6 +56,10 @@ cicada_new = cicada_test[:]
 pileup_pred = model.predict(cicada_new)
 print(mse_test, rmse_test, pileup_pred)
 
+"""
+MSE: 27.94085693359375 RMSE: 5.2859110832214355
+"""
+
 # Draw Learning Curve
 eval_metric(model, trainHistory)
 plt.savefig("learnCurveCICADAlike.png")
