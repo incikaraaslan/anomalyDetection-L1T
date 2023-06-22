@@ -6,7 +6,6 @@ import sklearn.model_selection as skms
 from functools import partial
 import matplotlib.pyplot as plt 
 import pandas as pd
-from evalNN import eval_metric
 
 # Read files from Andrew's large file
 directory = '/hdfs/store/user/aloeliger/largeInputFile_manyInput_CICADAv2.hdf5'
@@ -16,14 +15,9 @@ cicadaInput = cicadaInput.reshape(-1, 18, 14, 1)
 pileup = f['pileup'][:1000000] # len() -> 32316864
 f.close()
 
-# split train data to validation and main training
-# take a look at train v validation from the metric. Overfitting check -- employ regularization if overfitting. 
-
-# Split Data - 70-20-10 // Train-Val-Test
-cicada_train, cicada_test, pileup_train, pileup_test = skms.train_test_split(cicadaInput, pileup, test_size=0.10, random_state =1234)
-cicada_train, cicada_val, pileup_train, pileup_val = skms.train_test_split(cicada_train, pileup_train, test_size=0.20, random_state =1234)
-
-
+# Split Data
+cicada_train, cicada_test, pileup_train, pileup_test = skms.train_test_split(cicadaInput, pileup, test_size=0.20, random_state =1234)
+print(cicada_train.shape, pileup_train.shape)
 # Model Construction
 # Thin Wrapper for Keras Conv2D callable in order to call on the activation function etc.
 DConv2D = partial(tf.keras.layers.Conv2D, kernel_size = 5, padding = "same", activation = "relu")
@@ -46,17 +40,16 @@ trainHistory = model.fit(
     cicada_train, 
     pileup_train, 
     batch_size = 32, 
-    epochs = 10,
-    validation_data=(cicada_val,pileup_val)
+    epochs = 10
 )
 
+# Quick Learning Curve and Gen Error testing
+"""pd.DataFrame(trainHistory.history).plot(figsize = (8,5), grid = True, xlabel = "Epoch", style = ["r--", "r--", "b-", "b-*"])
+plt.savefig("learnCurve.png")"""
+# model.evaluate(cicada_test, pileup_test)
 
 # Test Model
 mse_test, rmse_test = model.evaluate(cicada_test, pileup_test)
 cicada_new = cicada_test[:]
 pileup_pred = model.predict(cicada_new)
 print(mse_test, rmse_test, pileup_pred)
-
-# Draw Learning Curve
-eval_metric(model, trainHistory)
-plt.savefig("learnCurve.png")
