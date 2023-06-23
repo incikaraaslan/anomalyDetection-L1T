@@ -8,6 +8,17 @@ from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 import math
 
+"""
+- Look at other regression models, classical ML methods
+- mlflow if you wanna check it out
+- GridSearchCV
+- PCA, Robust PCA --> it could work for noise removal --> pileup//noise removal
+- if you had a dataset with sample w and sample wo pileup, how to substract pileup
+- pileup is theoretically uniformly distributed across the sample --> A doesn't think it's true, might be nondeterministic
+- Still varies from event to event. Discuss this with Andrew
+"""
+
+
 # Read files from Andrew's large file
 directory = '/hdfs/store/user/aloeliger/largeInputFile_manyInput_CICADAv2.hdf5'
 f = h5py.File(directory, 'r')

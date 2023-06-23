@@ -23,16 +23,20 @@ f.close()
 cicada_train, cicada_test, pileup_train, pileup_test = skms.train_test_split(cicadaInput, pileup, test_size=0.10, random_state =1234)
 cicada_train, cicada_val, pileup_train, pileup_val = skms.train_test_split(cicada_train, pileup_train, test_size=0.20, random_state =1234)
 
-
 # Model Construction
 # Thin Wrapper for Keras Conv2D callable in order to call on the activation function etc.
-DConv2D = partial(tf.keras.layers.Conv2D, kernel_size = 5, padding = "same", activation = "relu")
+DConv2D = partial(tf.keras.layers.Conv2D, kernel_size = 3, strides = 2, padding = "same", activation = "relu")
 # Group the linear stack of layers into a tf.keras.Model
 model = tf.keras.Sequential(
     [
-        DConv2D(filters = 64, input_shape = (18, 14, 1)), 
-        tf.keras.layers.Flatten(), 
-        tf.keras.layers.Dense(units = 64, activation = "relu"), 
+        DConv2D(filters = 64, input_shape = (18, 14, 1)),
+        tf.keras.layers.MaxPooling2D(),
+        DConv2D(filters = 128, input_shape = (18, 14, 1)),
+        DConv2D(filters = 128, input_shape = (18, 14, 1)), 
+        tf.keras.layers.GlobalMaxPooling2D(),
+        tf.keras.layers.Dense(units = 128, activation = "relu"),
+        tf.keras.layers.Dense(units = 64, activation = "relu"),
+        tf.keras.layers.Dense(units = 64, activation = "relu"),
         tf.keras.layers.Dense(units  = 1, activation = "relu")
     ]
 )
@@ -56,10 +60,11 @@ mse_test, rmse_test = model.evaluate(cicada_test, pileup_test)
 cicada_new = cicada_test[:]
 pileup_pred = model.predict(cicada_new)
 print(mse_test, rmse_test, pileup_pred)
+
 """
-26.774742126464844  RMSE: 5.174431324005127
+MSE: 28.381776809692383 RMSE: 5.327455043792725
 """
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learnCurve.png")
+plt.savefig("learnCurveTRY2.png")
