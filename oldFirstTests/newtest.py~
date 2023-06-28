@@ -17,7 +17,6 @@ for i in range(chain.GetEntries()):
     # Keep in mind that the computer doesn't have the memory to store every entry in the chain so you have to load everytime.
     chain.GetEntry(i)
     a = chain.anomalyScore
-    print(a)
     h1runA.Fill(a)
 
 h1runA.Draw()

@@ -1,5 +1,4 @@
 import ROOT
-import tqdm
 import os
 print("ROOT version {ROOT.__version__}")
 
@@ -14,7 +13,7 @@ for filename in os.listdir("/hdfs/store/user/aloeliger/uGTComparisons/v_2/RunA")
 canvas = ROOT.TCanvas()
 h1runA = ROOT.TH1F("RunA H1", "anomalyScore", 100, 0.0, 60.0)
 
-for i in tqdm(range(chain.GetEntries())):
+for i in range(chain.GetEntries()):
     # Keep in mind that the computer doesn't have the memory to store every entry in the chain so you have to load everytime.
     chain.GetEntry(i)
     a = chain.anomalyScore

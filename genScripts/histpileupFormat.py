@@ -11,7 +11,7 @@ lineColors2 = np.asarray([45, 31, 37])
 black = 1
 ROOT.gStyle.SetOptStat(False)
  
-o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/" # newhistFiles/
+o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/newhistFiles/"
 a = "histPileup_run"
 b = "histPred_run"
 # b2 = "histPileupPred_run"
@@ -87,10 +87,10 @@ for i in tqdm(range(3)):
     hist2 = f2.Get(b+runs[i])
     hist2.SetName("Run " + runs[i])
 
-    f3 = ROOT.TFile.Open(flist3[i], 'READ')
+    """f3 = ROOT.TFile.Open(flist3[i], 'READ')
     openfiles3.append(f3)
     hist3 = f3.Get(c+runs[i])
-    hist3.SetName("Run " + runs[i])
+    hist3.SetName("Run " + runs[i])"""
 
     hist.SetLineColor(int(lineColors[i]))
     hist.SetMarkerColor(int(lineColors[i]))
@@ -145,17 +145,19 @@ for i in tqdm(range(3)):
         hist2.SetMinimum(yMin2)"""
     hists2.append(hist2)
 
+    hist3 = hist2.Clone()
+    hist3.Divide(hist)
     hist3.SetLineColor(int(lineColors[i]))
     hist3.SetMarkerColor(int(lineColors[i]))
     hist3.SetMarkerStyle(8)
     hist3.SetMarkerSize(0.2)
     hist3.SetTitle("")
     hist3.GetYaxis().SetTitle("Events")
-    hist3.GetXaxis().SetTitle("SNAIL/True Pileup")
+    hist3.GetXaxis().SetTitle("Ratio")
     hist3.GetXaxis().SetTitleSize(0.06)
-    hist3.GetXaxis().SetTitleOffset(0.5)
+    hist3.GetXaxis().SetTitleOffset(0.7)
     hist3.GetYaxis().SetTitleSize(0.06)
-    hist3.GetYaxis().SetTitleOffset(0.25)
+    hist3.GetYaxis().SetTitleOffset(0.4)
     #xMax = hist.GetXaxis().GetXmax() * 1.75
     yMax3 = hist3.GetMaximum() * 1.75
     maxlist3.append(yMax3)
@@ -241,4 +243,4 @@ pileg = pileupPad.BuildLegend(0.7, 0.75, 0.87, 0.87)
 pileg.Draw()
 
 canvas.Draw()
-canvas.SaveAs('SNAILPileupnew.png')
+canvas.SaveAs('SNAILPileupGM.png')
