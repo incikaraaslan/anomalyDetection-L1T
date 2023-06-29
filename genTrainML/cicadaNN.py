@@ -63,3 +63,5 @@ MSE: 27.94085693359375 RMSE: 5.2859110832214355
 # Draw Learning Curve
 eval_metric(model, trainHistory)
 plt.savefig("learnCurveCICADAlike.png")
+# Calling `save('my_model')` creates a SavedModel folder `my_model`.
+model.save("CICADA-like_NN")

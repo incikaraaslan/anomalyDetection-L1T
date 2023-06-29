@@ -6,7 +6,7 @@ from tqdm import tqdm
 ROOT.gStyle.SetOptStat(0)
 
 o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/CICADAPUPlots/"
-b = "anomalyScore"
+b = "CS" # "anomalyScore"
 # newhistFiles/
 a = ["010_run", "1020_run", "2030_run", "3040_run", "4050_run", "5060_run", "6070_run", "7080_run"]
 flist = []
@@ -42,16 +42,16 @@ for i in tqdm(range(24)):
     hist.SetMarkerStyle(8)
     hist.SetMarkerSize(0.5)
     hist.SetTitle("")
-    hist.GetXaxis().SetTitle("CICADA Score")
+    hist.GetXaxis().SetTitle("CICADA/SNAIL Score") # "CICADA Score"
     hist.GetXaxis().SetTitleSize(0.045)
     hist.GetXaxis().SetTitleOffset(0.9)
     hist.GetYaxis().SetTitleSize(0.045)
     hist.GetYaxis().SetTitleOffset(0.9)
     #xMax = hist.GetXaxis().GetXmax() * 1.75
-    yMax = hist.GetMaximum() * 1.25
-    hist.SetMaximum(yMax)
-    if i in range(i, i+8):
-        hist.GetXaxis().SetLimits(, xMax)
+    # yMax = hist.GetMaximum() * 1.25
+    # hist.SetMaximum(yMax)
+    hist.GetXaxis().SetRangeUser(hist.GetXaxis().GetXmin(), hist.GetXaxis().GetXmax())
+    hist.GetYaxis().SetRangeUser(hist.GetMinimum(), hist.GetMaximum())
     hists.append(hist)
     hists[i].Draw("E1")
     canvas.Draw()
