@@ -5,7 +5,9 @@ import os
 def prepChains(directory):
     chains = {
 'anomalyChain': ROOT.TChain("L1TCaloSummaryTestNtuplizer/L1TCaloSummaryOutput"), 
-'PUChain': ROOT.TChain("pileupNetworkNtuplizer/pileupTree")}
+'PUChain': ROOT.TChain("pileupNetworkNtuplizer/pileupTree"),
+'cicadaChain': ROOT.TChain("CICADAv1ntuplizer/L1TCaloSummaryOutput"),
+'newPUChain': ROOT.TChain("inciSNAILv0p1Ntuplizer/pileupTree")}
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         for chainname in chains:

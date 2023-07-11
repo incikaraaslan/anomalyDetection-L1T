@@ -19,7 +19,7 @@ b = np.asarray(list(listofPlots.keys())).astype(int)
 while not (selectPlot in b):
     selectPlot = int(input("Please select the type of plot desired (1: CICADA, 2: CICADA/SNAIL, 3: CICADA/SNAIL**2, 4: SNAIL v. Pileup) : "))
 
-o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/newhistFiles/"
+o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/"
 # newhistFiles/
 a = ''
 if selectPlot == 1:
@@ -34,8 +34,8 @@ runs = ["A", "B", "C", "D"] # 'B' whenever I have that for pileup lol
 lineColors = np.asarray([46, 30, 38, 40])
 black = 1
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
-# canvas.SetLogy()
-# canvas.SetLogx()
+canvas.SetLogy()
+canvas.SetLogx()
 ROOT.gStyle.SetOptStat(False)
  
 flist = [o+a+runs[0]+'.root', o+a+runs[1]+'.root', o+a+runs[2]+'.root', o+a+runs[3]+'.root']
@@ -82,4 +82,4 @@ for i in tqdm(range(4)):
 
 leg.Draw()
 canvas.Draw()
-canvas.SaveAs(a+'.png')
+canvas.SaveAs('INCI'+a+'.png')

@@ -4,19 +4,38 @@ import os
 import prepChains as pc
 
 run = input("Which Run?")
-directory = "/hdfs/store/user/aloeliger/uGTComparisons/v_2/Run"+run+"/" 
-chains = pc.prepChains(directory)
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
+#"/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
+
+# There's probably a better way to do this ngl - Run Differentiation
+add = [f.path for f in os.scandir(m_dir) if f.is_dir()]
+run_list = [a.path for a in os.scandir(add[0]) if a.is_dir()]
+
+# Prepping Chains
+for i in range(len(run_list)):
+    chains = pc.prepChains(run_list[i])
+
+
+"""directory = "/hdfs/store/user/aloeliger/uGTComparisons/v_2/Run"+run+"/" 
+chains = pc.prepChains(directory)"""
 
 h1run = ROOT.TH1F("Run"+run+" H1", "anomalyScore", 100, 0.0, 10.0)
 h2run = ROOT.TH1F("Run"+run+" H2", "anomalyScore/pileupPrediction", 100, 0.0, 1.0)
 h3run = ROOT.TH1F("Run"+run+" H3", "anomalyScore/pileupPrediction^2", 100, 0.0, 1.0)
 
-for i in tqdm(range(chains['anomalyChain'].GetEntries())):
-    chains['anomalyChain'].GetEntry(i)
-    chains['PUChain'].GetEntry(i)
-    a = chains['anomalyChain'].anomalyScore
-    b = a / chains['PUChain'].pileupPrediction
-    c = a / (chains['PUChain'].pileupPrediction)**2
+for i in tqdm(range(chains['cicadaChain'].GetEntries())): #chains['anomalyChain'].GetEntries())
+    """chains['anomalyChain'].GetEntry(i)
+    chains['PUChain'].GetEntry(i)"""
+    chains['cicadaChain'].GetEntry(i)
+    chains['newPUChain'].GetEntry(i)
+    a = chains['cicadaChain'].anomalyScore
+    d = chains['newPUChain'].pileupPrediction
+    if d != 0:
+        b = a / d
+        c = a / (d)**2
+    else:
+        b = a
+        c = a
     h1run.Fill(a)
     h2run.Fill(b)
     h3run.Fill(c)

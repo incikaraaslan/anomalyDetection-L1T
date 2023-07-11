@@ -8,7 +8,15 @@ import math
 ROOT.gStyle.SetOptStat(0)
 
 run = input("Which Run?")
+# True Pileup Information
 m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
+add = [f.path for f in os.scandir(m_dir) if f.is_dir()]
+run_list = [a.path for a in os.scandir(add[0]) if a.is_dir()]
+for i in range(len(run_list)):
+    chain = pc.prepChains(run_list[i])
+
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
+# "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
 # There's probably a better way to do this ngl - Run Differentiation
 add = [f.path for f in os.scandir(m_dir) if f.is_dir()]
@@ -24,11 +32,12 @@ hPileup = ROOT.TH1F("pRun_"+run, "True Pileup", 80, 0.0, 80.0)
 hPrediction = ROOT.TH1F("ppredRun_"+run, "Prediction", 80, 0.0, 80.0)
 hPileupvPrediction = ROOT.TH1F("pvpredRun_"+run, "Prediction/True Pileup", 80, 0.0, 80.0)
 
-for i in tqdm(range(chains['anomalyChain'].GetEntries())):
-    chains['anomalyChain'].GetEntry(i)
-    chains['PUChain'].GetEntry(i)
-    truePileup = chains['anomalyChain'].npv
-    predictedPileup = math.floor(chains['PUChain'].pileupPrediction) # round down to int
+for i in tqdm(range(chains['cicadaChain'].GetEntries())):
+    chains['cicadaChain'].GetEntry(i)
+    chain['anomalyChain'].GetEntry(i)
+    chains['newPUChain'].GetEntry(i)
+    truePileup = chain['anomalyChain'].npv
+    predictedPileup = math.floor(chains['newPUChain'].pileupPrediction) # round down to int
     hPileupvPrediction.Fill(predictedPileup/truePileup)
     hPileup.Fill(truePileup)
     hPrediction.Fill(predictedPileup)

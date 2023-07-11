@@ -12,7 +12,7 @@ b = np.asarray(list(listofPlots.keys())).astype(int)
 while not (selectPlot in b):
     selectPlot = int(input("Please select the type of plot desired (1: CICADA, 2: CICADA/SNAIL, 3: CICADA/SNAIL**2) : "))
 
-o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/newhistFiles/"
+o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/"
 # newhistFiles/
 a = ''
 if selectPlot == 1:
