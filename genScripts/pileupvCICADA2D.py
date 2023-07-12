@@ -8,7 +8,8 @@ import math
 ROOT.gStyle.SetOptStat(0)
 
 run = input("Which Run?")
-m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/" # "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
+#m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/" # "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
 # There's probably a better way to do this ngl - Run Differentiation
 add = [f.path for f in os.scandir(m_dir) if f.is_dir()]
@@ -27,14 +28,20 @@ avgarr = []
 
 count = 0
 
-for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChain'].GetEntries()
-    chains['anomalyChain'].GetEntry(i)
-    chains['PUChain'].GetEntry(i)
-    predictedPileup = math.floor(chains['PUChain'].pileupPrediction)
-    truePileup = chains['anomalyChain'].npv
+for i in tqdm(range(chains['cicadaChain'].GetEntries())): # chains['anomalyChain'].GetEntries()
+    """chains['anomalyChain'].GetEntry(i)
+    chains['PUChain'].GetEntry(i)"""
+    chains['cicadaChain'].GetEntry(i)
+    chains['newPUChain'].GetEntry(i)
+    chains['pileupInfo'].GetEntry(i)
+    predictedPileup = math.floor(chains['newPUChain'].pileupPrediction)
+    truePileup = chains['pileupInfo'].npv
     tpileuparr.append(truePileup)
-    anomalyScore = chains['anomalyChain'].anomalyScore
-    SNAIL = anomalyScore/predictedPileup
+    anomalyScore = chains['cicadaChain'].anomalyScore
+    if predictedPileup != 0:
+        SNAIL = anomalyScore/predictedPileup
+    else:
+        SNAIL: anomalyScore
     
     """
     nBins = hanompileup.GetNbinsX() # 100

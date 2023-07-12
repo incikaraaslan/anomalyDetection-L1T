@@ -23,8 +23,8 @@ elif selectPlot == 3:
     a = 'histCS2_run'
 
 # Running the histograms
-runs = ["A","B","C", "D"]
-flist = [o+a+runs[0]+'.root', o+a+runs[1]+'.root', o+a+runs[2]+'.root', o+a+runs[3]+'.root']
+runs = ["A","C", "D"]
+flist = [o+a+runs[0]+'.root', o+a+runs[1]+'.root', o+a+runs[2]+'.root']
 openfiles = []
 hists = []
 eHists = []
@@ -39,7 +39,7 @@ leg.SetBorderSize(1)
 leg.SetFillColor(0)
 leg.SetFillStyle(2)
 leg.SetTextFont(40)
-for i in tqdm(range(4)):
+for i in tqdm(range(3)):
     # Resolving ROOTs memory issues by making sure both the file and the histogram is saved somewhere.
     f = ROOT.TFile.Open(flist[i], 'READ')
     openfiles.append(f)
@@ -87,5 +87,5 @@ for i in tqdm(range(4)):
 
 leg.Draw()
 canvas.Draw()
-canvas.SaveAs(a+'rate.png')
+canvas.SaveAs('INCI'+a+'rate.png')
 

@@ -30,7 +30,7 @@ elif selectPlot == 3:
     a = 'histCS2_run'
 
 # Running the histograms
-runs = ["A", "B", "C", "D"] # 'B' whenever I have that for pileup lol
+runs = ["A", "C", "D"] # 'B' whenever I have that for pileup lol
 lineColors = np.asarray([46, 30, 38, 40])
 black = 1
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
@@ -38,7 +38,7 @@ canvas.SetLogy()
 canvas.SetLogx()
 ROOT.gStyle.SetOptStat(False)
  
-flist = [o+a+runs[0]+'.root', o+a+runs[1]+'.root', o+a+runs[2]+'.root', o+a+runs[3]+'.root']
+flist = [o+a+runs[0]+'.root', o+a+runs[1]+'.root', o+a+runs[2]+'.root']
 openfiles = []
 hists = []
 
@@ -48,7 +48,7 @@ leg.SetFillColor(0)
 leg.SetFillStyle(2)
 leg.SetTextFont(40)
 
-for i in tqdm(range(4)):
+for i in tqdm(range(3)):
     f = ROOT.TFile.Open(flist[i], 'READ')
     openfiles.append(f)
     hist = f.Get(a+runs[i])

@@ -4,7 +4,7 @@ import os
 import prepChains as pc
 
 run = input("Which Run?")
-m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
 #"/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
 # There's probably a better way to do this ngl - Run Differentiation

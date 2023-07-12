@@ -11,7 +11,7 @@ lineColors2 = np.asarray([45, 31, 37])
 black = 1
 ROOT.gStyle.SetOptStat(False)
  
-o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/newhistFiles/"
+o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/"
 a = "histPileup_run"
 b = "histPred_run"
 # b2 = "histPileupPred_run"
@@ -243,4 +243,4 @@ pileg = pileupPad.BuildLegend(0.7, 0.75, 0.87, 0.87)
 pileg.Draw()
 
 canvas.Draw()
-canvas.SaveAs('SNAILPileupGM.png')
+canvas.SaveAs('INCISNAILPileupGM.png')

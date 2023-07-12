@@ -5,6 +5,7 @@ import prepChains as pc
 import numpy as np
 import math
 import matplotlib.pyplot as plt
+from array import array
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -22,19 +23,11 @@ for i in range(len(run_list)):
 # Creating the Histograms
 canvas = ROOT.TCanvas()
 hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score", 100, 0.0, 10.0, 10, 0.0, 100.0)
-sumo = []
-sum010 = 0
-sum1020 = 0
-sum2030 = 0
-sum3040 = 0
-sum4050 = 0
-sum5060 = 0
-sum6070 = 0
-sum7080 = 0
-sum8090 = 0
-sum90100 = 0
-
-a = []
+arr = []
+arry = []
+xbins = 100
+ybins = 10
+sumo = 0
 
 for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChain'].GetEntries()
     chains['anomalyChain'].GetEntry(i)
@@ -43,52 +36,37 @@ for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChai
     truePileup = chains['anomalyChain'].npv
     anomalyScore = chains['anomalyChain'].anomalyScore
     SNAIL = anomalyScore/predictedPileup
-    nBinsy = hanompileup.GetNbinsY()
-
-    for j in range(nBinsy):
-        a.append(hanompileup.GetBinContent(j+1))
-
-    print(a)
-
-    if truePileup in range(0,10):
-        sum010 += anomalyScore
-    elif truePileup in range(10,20):
-        sum1020 += anomalyScore
-    elif truePileup in range(20,30):
-        sum2030 += anomalyScore
-    elif truePileup in range(30,40):
-        sum3040 += anomalyScore
-    elif truePileup in range(40,50):
-        sum4050 += anomalyScore
-    elif truePileup in range(50,60):
-        sum5060 += anomalyScore
-    elif truePileup in range(60,70):
-        sum6070 += anomalyScore
-    elif truePileup in range(70,80):
-        sum7080 += anomalyScore
-    elif truePileup in range(80,90):
-        sum8090 += anomalyScore
-    elif truePileup in range(90,100):
-        sum90100 += anomalyScore
-    else:
-        pass
     
-    """
-    nBins = hanompileup.GetNbinsX() # 100
-    nBinsy = hanompileup.GetNbinsY() # 10
-    # print(nBins, nBinsy)
+    # Loop over x values for all y values
+    for j in range(ybins):
+        for k in range(xbins):
+            pileupC = hanompileup.GetYaxis().GetBinCenter(j+1)
+            e = hanompileup.GetBinContent(k,j)
+            sumo += e
+        avg = sumo / xbins
+        arr.append(avg)
+        arry.append(pileupC)
+    
+    hanompileup.Fill(anomalyScore,truePileup)
+    
+average = array('d', getListOfAllRates(arr))
+truepileup = array('d', getListOfAllRates(arry))
+avgforEachP = ROOT.TGraph(len(arr), arr, arry)
 
-    for j in range(nBinsy):
-        pileupC = hanompileup.GetYaxis().GetBinCenter(j+1)    
-        print(pileupC, cicadaC)
-        centarrCy.append(pileupC)
-        centarrC.append(cicadaC)
-    """
-sumo.extend((sum010, sum1020, sum2030, sum3040, sum4050, sum5060, sum6070, sum7080, sum8090, sum90100))
-print(sumo)
-avgarr = []
+hanompileup.SetTitle("")
+hanompileup.GetXaxis().SetTitle("Anomaly Score")
+hanompileup.GetYaxis().SetTitle("True Pileup")
+hanompileup.SetMarkerStyle(8)
+hanompileup.SetMarkerSize(0.4)
+hanompileup.GetXaxis().SetTitleSize(0.035)
+hanompileup.GetXaxis().SetTitleOffset(1.2)
+hanompileup.GetYaxis().SetTitleSize(0.035)
+hanompileup.GetYaxis().SetTitleOffset(1.2)
+hanompileup.Draw("COLZ")
+avgforEachP.Draw("CP")
 
-for i in range(10):
-    avgarr.append(sumo[i]/a[i])
+canvas.Draw()
+canvas.SaveAs("anomnormpileupWG_run"+run+'.png')
 
-print(avgarr)
+
+
