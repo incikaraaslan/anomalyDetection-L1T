@@ -8,7 +8,8 @@ import math
 ROOT.gStyle.SetOptStat(0)
 
 run = input("Which Run?")
-m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
+# "/hdfs/store/user/aloelige/ZeroBias/CICADA_2022Run"+run+"_ZeroBias_07Jul2023/"
 #m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/" # "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
 # There's probably a better way to do this ngl - Run Differentiation
@@ -21,7 +22,7 @@ for i in range(len(run_list)):
 
 # Creating the Histograms
 canvas = ROOT.TCanvas()
-hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score", 100, 0.0, 10.0, 10, 0.0, 100.0)
+hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score/Pileup Prediction", 100, 0.0, 1.0, 10, 0.0, 100.0)
 sumo = []
 tpileuparr = []
 avgarr = []
@@ -55,7 +56,9 @@ for i in tqdm(range(chains['cicadaChain'].GetEntries())): # chains['anomalyChain
         avgbin = np.average(np.asarray(sumo))
         avgarr.append(avgbin)
     """
-    hanompileup.Fill(anomalyScore,truePileup)
+    hanompileup.Fill(SNAIL,truePileup)
+
+    # hanompileup.Fill(anomalyScore,truePileup)
 
 """tpileuparr = np.asarray(tpileuparr)
 avgarr = np.asarray(avgbin)
@@ -68,7 +71,7 @@ def sqrtfit(x, a, b):
 
 
 hanompileup.SetTitle("")
-hanompileup.GetXaxis().SetTitle("Anomaly Score")
+hanompileup.GetXaxis().SetTitle("Anomaly Score/Pileup Prediction")
 hanompileup.GetYaxis().SetTitle("True Pileup")
 hanompileup.SetMarkerStyle(8)
 hanompileup.SetMarkerSize(0.4)
@@ -82,7 +85,7 @@ plt.plot(avgarr, linfit(avgarr, *popt), "r-")
 plt.plot(avgarr, tpileuparr, "b")"""
 
 canvas.Draw()
-canvas.SaveAs("anomnormpileupN_run"+run+'.png')
+canvas.SaveAs("anomnormpileupNN_run"+run+'.png')
 
 """
 fanompileup = ROOT.TFile("anompileup_run"+run+".root", "CREATE")
