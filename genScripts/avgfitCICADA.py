@@ -48,17 +48,19 @@ for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChai
         arry.append(pileupC)
     
     hanompileup.Fill(anomalyScore,truePileup)
-    
+
 average = array('d', arr)
 truepileup = array('d', arry)
 avgforEachP = ROOT.TGraph(len(average), average, truepileup)
-print(arr, arry)
-print(average, truepileup)
+"""print(arr, arry)
+print(average, truepileup)"""
 
 avgfit = ROOT.TFile("avgforEachP_run"+run+".root", "CREATE")
 avgfit.WriteObject(hanompileup, "AnomalyNPileup"+run)
 avgfit.WriteObject(avgforEachP, "avgforEachP_run"+run)
+print("Histogram and Graph Created.")
 
+"""
 hanompileup.SetTitle("")
 hanompileup.GetXaxis().SetTitle("Anomaly Score")
 hanompileup.GetYaxis().SetTitle("True Pileup")
@@ -76,5 +78,5 @@ canvas.Draw()
 
 canvas.SaveAs("anomnormpileupWG_run"+run+'.png')
 
-
+"""
 

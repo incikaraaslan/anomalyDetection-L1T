@@ -22,7 +22,7 @@ for i in range(len(run_list)):
 
 # Creating the Histograms
 canvas = ROOT.TCanvas()
-hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score/Pileup Prediction", 100, 0.0, 1.0, 10, 0.0, 100.0)
+hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score", 100, 0.0, 1.0, 10, 0.0, 100.0)
 sumo = []
 tpileuparr = []
 avgarr = []
@@ -42,7 +42,7 @@ for i in tqdm(range(chains['cicadaChain'].GetEntries())): # chains['anomalyChain
     if predictedPileup != 0:
         SNAIL = anomalyScore/predictedPileup
     else:
-        SNAIL: anomalyScore
+        SNAIL = anomalyScore
     
     """
     nBins = hanompileup.GetNbinsX() # 100
@@ -56,7 +56,7 @@ for i in tqdm(range(chains['cicadaChain'].GetEntries())): # chains['anomalyChain
         avgbin = np.average(np.asarray(sumo))
         avgarr.append(avgbin)
     """
-    hanompileup.Fill(SNAIL,truePileup)
+    hanompileup.Fill(anomalyScore,truePileup)
 
     # hanompileup.Fill(anomalyScore,truePileup)
 
@@ -71,7 +71,7 @@ def sqrtfit(x, a, b):
 
 
 hanompileup.SetTitle("")
-hanompileup.GetXaxis().SetTitle("Anomaly Score/Pileup Prediction")
+hanompileup.GetXaxis().SetTitle("Anomaly Score")
 hanompileup.GetYaxis().SetTitle("True Pileup")
 hanompileup.SetMarkerStyle(8)
 hanompileup.SetMarkerSize(0.4)
@@ -85,7 +85,7 @@ plt.plot(avgarr, linfit(avgarr, *popt), "r-")
 plt.plot(avgarr, tpileuparr, "b")"""
 
 canvas.Draw()
-canvas.SaveAs("anomnormpileupNN_run"+run+'.png')
+canvas.SaveAs("anomnormpileupN_run"+run+'.png')
 
 """
 fanompileup = ROOT.TFile("anompileup_run"+run+".root", "CREATE")
