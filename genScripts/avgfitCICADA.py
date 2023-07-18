@@ -44,7 +44,7 @@ for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChai
 # Loop over x values for all y values
 for j in range(ybins):
     zmax = None
-    maxbin = 1
+    maxbin = 0
     for k in range(xbins):
         count += 1
         pileupC = hanompileup.GetYaxis().GetBinCenter(j+1)
@@ -63,8 +63,11 @@ for j in range(ybins):
             zmax = max(zmax, hanompileup.GetBinContent(k+1, j+1))
             if zmax == hanompileup.GetBinContent(k+1, j+1):
                 maxbin = k+1"""
-    xval.append(hanompileup.GetXaxis().GetBinCenter(maxbin))
-    yval.append(pileupC)
+    if maxbin > 0.2: # FOR RUND ONLY
+        xval.append(hanompileup.GetXaxis().GetBinCenter(maxbin))
+        yval.append(pileupC)
+    else:
+        pass
 
 print(xval, yval)
 anomscores = array('d', xval)
