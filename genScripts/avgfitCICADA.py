@@ -23,11 +23,12 @@ for i in range(len(run_list)):
 # Creating the Histograms
 canvas = ROOT.TCanvas()
 hanompileup = ROOT.TH2F("AnomalyNPileup"+run, "Pileup v. Anomaly Score", 100, 0.0, 10.0, 10, 0.0, 100.0)
-arr = []
-arry = []
+xval = []
+yval = []
 xbins = 100
 ybins = 10
-sumo = 0
+zbins = 1
+
 
 for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChain'].GetEntries()
     chains['anomalyChain'].GetEntry(i)
@@ -36,30 +37,51 @@ for i in tqdm(range(chains['anomalyChain'].GetEntries())): # chains['anomalyChai
     truePileup = chains['anomalyChain'].npv
     anomalyScore = chains['anomalyChain'].anomalyScore
     SNAIL = anomalyScore/predictedPileup
-    
-    # Loop over x values for all y values
-    for j in range(ybins):
-        for k in range(xbins):
-            pileupC = hanompileup.GetYaxis().GetBinCenter(j+1)
-            e = hanompileup.GetBinContent(k,j)
-            sumo += e
-        avg = sumo / xbins
-        arr.append(avg)
-        arry.append(pileupC)
-    
+    count = 0
     hanompileup.Fill(anomalyScore,truePileup)
 
-average = array('d', arr)
-truepileup = array('d', arry)
-avgforEachP = ROOT.TGraph(len(average), average, truepileup)
-"""print(arr, arry)
-print(average, truepileup)"""
 
-avgfit = ROOT.TFile("avgforEachP_run"+run+".root", "CREATE")
+# Loop over x values for all y values
+for j in range(ybins):
+    zmax = None
+    maxbin = 1
+    for k in range(xbins):
+        count += 1
+        pileupC = hanompileup.GetYaxis().GetBinCenter(j+1)
+        if zmax is None:
+            zmax = hanompileup.GetBinContent(k+1, j+1)
+        
+        elif hanompileup.GetBinContent(k+1, j+1) > zmax:
+            zmax = hanompileup.GetBinContent(k+1, j+1)
+            maxbin = k+1
+        print(maxbin)
+
+        """if k == 0:
+            zmax = hanompileup.GetBinContent(k+1, j+1)
+            maxbin = 1
+        else:
+            zmax = max(zmax, hanompileup.GetBinContent(k+1, j+1))
+            if zmax == hanompileup.GetBinContent(k+1, j+1):
+                maxbin = k+1"""
+    xval.append(hanompileup.GetXaxis().GetBinCenter(maxbin))
+    yval.append(pileupC)
+
+print(xval, yval)
+anomscores = array('d', xval)
+truepileup = array('d', yval)
+avgforEachP = ROOT.TGraph(len(anomscores), anomscores, truepileup)
+
+avgfit = ROOT.TFile("maxforEachP_run"+run+".root", "RECREATE")
 avgfit.WriteObject(hanompileup, "AnomalyNPileup"+run)
-avgfit.WriteObject(avgforEachP, "avgforEachP_run"+run)
+avgfit.WriteObject(avgforEachP, "maxforEachP_run"+run)
 print("Histogram and Graph Created.")
 
+"""maxbin = hanompileup.GetMaximum()
+        e = hanompileup.GetZaxis().GetBinCenter(1)"""
+        # = hanompileup.GetBinXYZ(maxbin, ROOT.Long(k), ROOT.Long(j), ROOT.Long(1))
+        # e = hanompileup.GetBinContent(k,j)
+        # print("Event Bin: " + str(e))
+        # sumo += e
 """
 hanompileup.SetTitle("")
 hanompileup.GetXaxis().SetTitle("Anomaly Score")

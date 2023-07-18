@@ -19,3 +19,26 @@ run_list = [a.path for a in os.scandir(add[0]) if a.is_dir()]
 for i in range(len(run_list)):
     chains = pc.prepChains(run_list[i])
 
+
+caloJetptarr = []
+genJetptarr = []
+
+# Matching vectors via deltaR < 0.3
+for i in tqdm(range(chains['caloJet'].GetEntries())):
+    chains['caloJet'].GetEntry(i)
+    for j in tqdm(range(chains['genJet'].GetEntries())):
+        chains['genJet'].GetEntry(j)
+        print(chains['caloJet'].etaVector, chains['genJet'].genJetEta)
+        delEta = chains['caloJet'].etaVector - chains['genJet'].genJetEta
+        delPhi = chains['caloJet'].phiVector - chains['genJet'].genJetPhi
+        deltaR = sqrt((delEta)**2 + (delPhi) **2)
+
+        if deltaR <= 0.3:
+            caloJetptarr.append(chains['caloJet'].ptVector)
+            genJetptarr.append(chains['caloJet'].genJetPt)
+        else: 
+            pass
+
+print(caloJetptarr)
+print(" ")
+print(genJetptarr)
