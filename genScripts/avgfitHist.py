@@ -15,7 +15,7 @@ ROOT.gStyle.SetOptStat(0)
 
 o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/"
 # newhistFiles/
-a = 'maxforEachP_run'
+a = 'INCImaxforEachP_run'
 b = 'AnomalyNPileup'
 
 # Running the histograms
@@ -41,13 +41,18 @@ hist.GetYaxis().SetTitleSize(0.035)
 hist.GetYaxis().SetTitleOffset(1.2)
 hist.Draw("COLZ")
     
-avgforEachP = f.Get("maxforEachP_run"+run)
+avgforEachP = f.Get("INCImaxforEachP_run"+run)
 # TF1 *f = new TF1("f", "[2] * x * x + [1] * x + [0]"); g->Fit(f); g->Draw("AL");
-# f = ROOT.TF1("f", "[1] * (x ** (0.5)) + [0]")
-# avgforEachP.Fit(f)
-avgforEachP.Fit("pol1")
+f = ROOT.TF1("f", "[1] * (x ** (0.5)) + [0]")
+avgforEachP.Fit(f)
+# avgforEachP.Fit("pol1")
 avgforEachP.Draw("SAME")
+
+canvas.Draw()
+canvas.SaveAs('INCIfittedpol12'+a+run+'.png')
 """
+OLD DATA
+
 Pol2
 Minimizer is Linear / Migrad
 Chi2                      =      76.7183
@@ -104,23 +109,57 @@ NCalls                    =           31
 p0                        =     -26.5615   +/-   8.97152     
 p1                        =       46.719   +/-   5.154       
 Info in <TCanvas::Print>: png file fittedpol12maxforEachP_runC.png has been created
-Chi2                      =      8248.01
-NDf                       =            8
-Edm                       =   3.2578e-20
-NCalls                    =           30
-p0                        =      50.7791   +/-   20.4476     
-p1                        =    -0.609299   +/-   13.8807     
-Info in <TCanvas::Print>: png file fittedpol12maxforEachP_runD.png has been created
 Chi2                      =      129.856
 NDf                       =            6
 Edm                       =  1.35589e-20
 NCalls                    =           31
 p0                        =     -21.4007   +/-   4.76994     
 p1                        =      39.8089   +/-   2.90289     
-Info in <TCanvas::Print>: png file fittedpol12maxforEachP_runD.png has been created    
+Info in <TCanvas::Print>: png file fittedpol12maxforEachP_runD.png has been created  
+
+
+NEW DATA
+Pol1
+Chi2                      =      198.871
+NDf                       =            8
+p0                        =     -2.63848   +/-   3.32282     
+p1                        =      18.2772   +/-   1.0156      
+Info in <TCanvas::Print>: png file INCIfittedpol1INCImaxforEachP_runA.png has been created
+Chi2                      =      197.969
+NDf                       =            8
+p0                        =     0.138727   +/-   3.18045     
+p1                        =      16.1363   +/-   0.894553    
+Info in <TCanvas::Print>: png file INCIfittedpol1INCImaxforEachP_runC.png has been created
+Chi2                      =      120.313
+NDf                       =            6
+p0                        =     -2.28944   +/-   3.36106     
+p1                        =      15.3084   +/-   1.07324     
+Info in <TCanvas::Print>: png file INCIfittedpol1INCImaxforEachP_runD.png has been created
+
+Pol1/2
+Chi2                      =      799.801
+NDf                       =            8
+Edm                       =  4.61904e-20
+NCalls                    =           31
+p0                        =     -29.1589   +/-   9.69967     
+p1                        =      49.3399   +/-   5.71558     
+Info in <TCanvas::Print>: png file INCIfittedpol12INCImaxforEachP_runA.png has been created
+Chi2                      =      653.013
+NDf                       =            8
+Edm                       =  3.07325e-20
+NCalls                    =           31
+p0                        =      -25.991   +/-   8.37907     
+p1                        =      45.9855   +/-   4.76669     
+Info in <TCanvas::Print>: png file INCIfittedpol12INCImaxforEachP_runC.png has been created
+Chi2                      =      384.283
+NDf                       =            6
+Edm                       =  6.81157e-20
+NCalls                    =           31
+p0                        =     -24.7665   +/-   8.85519     
+p1                        =       41.123   +/-   5.32778     
+Info in <TCanvas::Print>: png file INCIfittedpol12INCImaxforEachP_runD.png has been created
 """
 
-canvas.Draw()
-canvas.SaveAs('fittedpol1'+a+run+'.png')
+
 
 
