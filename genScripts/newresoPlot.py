@@ -4,6 +4,7 @@ import os
 import prepChains as pc
 import numpy as np
 import math
+from time import perf_counter
 
 ROOT.gStyle.SetOptStat(0)
 
@@ -20,19 +21,21 @@ for i in range(len(run_list)):
     chains = pc.prepChains(run_list[i])
 
 # Draw the Histogram
-h = ROOT.TH1F("gencaloResPlot", "Resolution Plot", 100, 0.0, 100.0)
+h = ROOT.TH1F("gencaloResPlot", "Resolution Plot", 100, -4.0, 4.0)
 
 # Lists
-caloJetptarr = []
-genJetptarr = []
 cg_matched = []
 cg_unmatched = []
 
 # Lorentz Vector Matching
-for i in tqdm(range(chains['genJet'].GetEntries())):
+for i in tqdm(range(1000)): # chains['genJet'].GetEntries() - 100000 events if you can
+    caloJetptarr = []
+    genJetptarr = []
     chains['genJet'].GetEntry(i)
     chains['caloJet'].GetEntry(i)
     # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
+    # start = datetime.now()
+    """t1_start = perf_counter()"""
     for j in range(chains['genJet'].genJetEta.size()):
         genJet = ROOT.TLorentzVector()
         genJet.SetPtEtaPhiM(chains['genJet'].genJetPt[j], chains['genJet'].genJetEta[j], chains['genJet'].genJetPhi[j], chains['genJet'].genJetMass[j])
@@ -41,45 +44,67 @@ for i in tqdm(range(chains['genJet'].GetEntries())):
         caloJet = ROOT.TLorentzVector()
         caloJet.SetPtEtaPhiM(chains['caloJet'].ptVector[j], chains['caloJet'].etaVector[j], chains['caloJet'].phiVector[j], chains['caloJet'].massVector[j])
         caloJetptarr.append(caloJet)
-    
+    """t1_stop = perf_counter()
+    print("Lorentz Block:", t1_stop - t1_start)""" # 174 ms
+    """end = datetime.now()
+    td = (end - start).total_seconds() * 10**3"""
+    # print(f"The time of execution of above program is : {td:.03f}ms") # 244.007 ms / 147
+
     # Matching vectors via deltaR < 0.3
     j = 0
-    while tqdm(len(genJetptarr) != 0):
-        mincalojet = None
+    """t2_start = perf_counter()"""
+    """start3 = datetime.now()"""
+    while tqdm(len(genJetptarr) != 0, leave=False):
+        minindex = None
         delR = None
+
+        """t3_start = perf_counter()"""
+        """start1 = datetime.now()"""
         for k in range(len(caloJetptarr)):
+            current_delR = ROOT.Math.VectorUtil.DeltaR(genJetptarr[j], caloJetptarr[k])
+            if current_delR > 0.3:
+                continue
+             
             if delR == None:
-                delR = ROOT.Math.VectorUtil.DeltaR(genJetptarr[j], caloJetptarr[k])
-            
-            elif (ROOT.Math.VectorUtil.DeltaR(genJetptarr[j], caloJetptarr[k]) <= 0.3):
-                delR = min(ROOT.Math.VectorUtil.DeltaR(genJetptarr[j], caloJetptarr[k]), delR)
-                mincalojet = caloJetptarr[k]
+                delR = current_delR
                 minindex = k
-
-            else:
-                pass
             
-        # Place into matched and unmatched
-        if mincalojet != None:
-            elementgen = genJetptarr.pop(j)
-            elementcalo = caloJetptarr.pop(minindex)
-            genJetptarr.insert(0, elementgen)
-            caloJetptarr.insert(0, elementcalo)
-
-            cg_matched.append((genJetptarr.pop(0), caloJetptarr.pop(0)))
-            # print("Popped!")
-        elif mincalojet == None:
-            elementgen = genJetptarr.pop(j)
-            genJetptarr.insert(0, elementgen)
-
-            if genJetptarr:
-                cg_unmatched.append(genJetptarr.pop(0))
             else:
-                pass
+                if current_delR < delR:
+                    delR = current_delR
+                    minindex = k
+                else:
+                    continue
+        """t3_stop = perf_counter()
+        print("Neighbor Search:", t3_stop-t3_start)""" # 159 ms
+        """end1 = datetime.now()
+        td1 = (end1 - start1).total_seconds() * 10**3
+        print(f"The time of execution of above program is : {td1:.03f}ms")""" # 254.120 ms / 167 / 
+
+        # Place into matched and unmatched
+        """t4_start = perf_counter()"""
+        """ start2 = datetime.now()"""
+        if minindex:
+            cg_matched.append((genJetptarr.pop(0), caloJetptarr.pop(minindex)))
+            # print("Popped!")
+        else:
+            cg_unmatched.append(genJetptarr.pop(0))
+        """end2 = datetime.now()
+        td2 = (end2 - start2).total_seconds() * 10**3"""
+        # print(f"The time of execution of above program is : {td2:.03f}ms") # 0.03 ms / 0.023
+        """t4_stop = perf_counter()
+        print("Matched Unmatched:", t4_stop-t4_start)"""
         
         # Just in Case :)
         if not caloJetptarr:
-            cg_unmatched.append(genJetptarr.pop(0))
+            if genJetptarr:
+                cg_unmatched.append(genJetptarr.pop(0))
+
+    """t2_stop = perf_counter()
+    print("While Loop:", t2_stop-t2_start)""" # 4 ms
+    """end3 = datetime.now()
+    td3 = (end3 - start3).total_seconds() * 10**3"""
+    # print(f"The time of execution of above program is : {td3:.03f}ms") #6.69 ms? / 4.416 ms
         
 
 
@@ -90,10 +115,10 @@ print("Unmatched Arr: " + str(cg_unmatched))"""
 
 # Draw the Histogram
 for i in cg_matched:
-    reso = (i[1].Pt - i[0].Pt)/(i[0].Pt)
+    reso = (i[1].Pt() - i[0].Pt())/(i[0].Pt())
     h.Fill(reso)
 
-resoh = ROOT.TFile("gencaloResPlot.root", "CREATE")
+resoh = ROOT.TFile("gencaloResPlot.root", "RECREATE")
 resoh.WriteObject(h, "gencaloResPlot")
 print("Histogram Created.")
 
