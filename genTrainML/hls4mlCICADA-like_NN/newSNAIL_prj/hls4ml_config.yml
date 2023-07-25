@@ -1,0 +1,15 @@
+Backend: Vivado
+ClockPeriod: 6.25
+HLSConfig:
+  Model:
+    BramFactor: 1000000000
+    Precision: fixed<16,6>
+    ReuseFactor: 1
+    Strategy: Latency
+    TraceOutput: false
+IOType: io_parallel
+KerasModel: !keras_model 'hls4mlCICADA-like_NN/newSNAIL_prj/keras_model.h5'
+OutputDir: hls4mlCICADA-like_NN/newSNAIL_prj
+Part: xc7vx690tffg1927-2
+ProjectName: myproject
+Stamp: FC887F7c

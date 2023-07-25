@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Messages>
+	<Message severity="INFO" prefix="[SCHED 204-61]" key="SCHED_PIPELINING_STATUS_631" tag="SCHEDULE" content="Option &apos;relax_ii_for_timing&apos; is enabled, will increase II to preserve clock frequency constraints."/>
+	<Message severity="INFO" prefix="[HLS 200-10]" key="HLS_10_1312" tag="" content="Analyzing design file &apos;firmware/myproject.cpp&apos; ..."/>
+	<Message severity="WARNING" prefix="[HLS 200-40]" key="HLS_40_1378" tag="" content="In file included from firmware/myproject.cpp:1:
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/iostream:37:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/x86_64-unknown-linux-gnu/bits/c++config.h:744:5: error: builtin feature check macro requires a parenthesized identifier
+#if _GLIBCXX_HAS_BUILTIN(__is_same)
+    ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/x86_64-unknown-linux-gnu/bits/c++config.h:728:35: note: expanded from macro &apos;_GLIBCXX_HAS_BUILTIN&apos;
+#  define _GLIBCXX_HAS_BUILTIN(B) __has_builtin(B)
+                                  ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/x86_64-unknown-linux-gnu/bits/c++config.h:744:5: error: expected end of line in preprocessor expression
+#if _GLIBCXX_HAS_BUILTIN(__is_same)
+    ^
+/cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/x86_64-unknown-linux-gnu/bits/c++config.h:728:50: note: expanded from macro &apos;_GLIBCXX_HAS_BUILTIN&apos;
+#  define _GLIBCXX_HAS_BUILTIN(B) __has_builtin(B)
+                                                 ^
+In file included from firmware/myproject.cpp:4:
+In file included from firmware/parameters.h:7:
+In file included from firmware/nnet_utils/nnet_code_gen.h:4:
+In file included from firmware/nnet_utils/nnet_helpers.h:8:
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/map:60:
+In file included from /cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/bits/stl_map.h:63:
+/cvmfs/cms.cern.ch/slc7_amd64_gcc11/external/gcc/11.2.1-f9b9dfdd886f71cd63f5538223d8f161/lib/gcc/x86_64-unknown-linux-gnu/11.2.1/../../../../include/c++/11.2.1/tuple:75:24: error: token is not a valid binary operator in a preprocessor subexpression
+#if __has_cpp_attribute(__no_unique_address__)
+    ~~~~~~~~~~~~~~~~~~~^
+3 errors generated."/>
+</Messages>

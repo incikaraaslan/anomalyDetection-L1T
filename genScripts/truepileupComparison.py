@@ -7,9 +7,10 @@ import math
 
 ROOT.gStyle.SetOptStat(0)
 
-run = input("Which Run?")
+run = "" # input("Which Run?")
 
-m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
+m_dir = "/hdfs/store/user/aloelige/TT_TuneCP5_13p6TeV_powheg-pythia8/CICADA_2022_TT_07Jul2023/"
+# "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
 # "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
 # There's probably a better way to do this ngl - Run Differentiation
@@ -39,12 +40,12 @@ for i in tqdm(range(chains['cicadaChain'].GetEntries())):
     hPileup.Fill(truePileup)
     hPrediction.Fill(predictedPileup)
 
-fPileup = ROOT.TFile("histPileup_run"+run+".root", "CREATE")
+fPileup = ROOT.TFile("histPileup_run"+run+".root", "RECREATE")
 fPileup.WriteObject(hPileup, "histPileup_run"+run)
-print("Histogram 1 Created.") 
-fPileupvPrediction = ROOT.TFile("histPredPileup_run"+run+".root", "CREATE")
+print("Histogram 1 RECREATEd.") 
+fPileupvPrediction = ROOT.TFile("histPredPileup_run"+run+".root", "RECREATE")
 fPileupvPrediction.WriteObject(hPileupvPrediction, "histPredPileup_run"+run)
-print("Histogram 2 Created.") 
-fPrediction = ROOT.TFile("histPred_run"+run+".root", "CREATE")
+print("Histogram 2 RECREATEd.") 
+fPrediction = ROOT.TFile("histPred_run"+run+".root", "RECREATE")
 fPrediction.WriteObject(hPrediction, "histPred_run"+run)
-print("Histogram 3 Created.")
+print("Histogram 3 RECREATEd.")
