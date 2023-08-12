@@ -3,7 +3,9 @@ import os
 import numpy as np
 from tqdm import tqdm
 
-ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetOptStat(2210)
+ROOT.gStyle.SetStatW(0.3)
+ROOT.gStyle.SetStatH(0.105)
 
 o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/pileupresos/"
 b = "hp" # "anomalyScore"
@@ -41,6 +43,7 @@ for i in tqdm(range(8)):
     hist = f.Get(pnames[i])
     phist = f.Get(ppnames[i])
 
+    hist.SetStats(1)
     hist.SetLineColor(int(lineColors[0]))
     hist.SetMarkerColor(int(lineColors[0]))
     hist.SetMarkerStyle(8)
@@ -62,6 +65,7 @@ for i in tqdm(range(8)):
     hist.GetXaxis().SetRangeUser(xmin, xmax)
     hist.GetYaxis().SetRangeUser(ymin, ymax)
 
+    phist.SetStats(1)
     phist.SetLineColor(int(lineColors[1]))
     phist.SetMarkerColor(int(lineColors[1]))
     phist.SetMarkerStyle(8)
