@@ -2,11 +2,12 @@ import ROOT
 import os
 
 
+run = input("Log in the Run A, C, D:")
 directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/'
 
-f = ROOT.TFile.Open('gencaloResPlot.root', 'READ')
+f = ROOT.TFile.Open("resocaloResPlot"+run+".root", 'READ')
 canvas = ROOT.TCanvas('canvas1', '', 500, 500)
-hist = f.Get('gencaloResPlot')
+hist = f.Get("resocaloResPlot"+run)
 
 # Formatting
 ROOT.gStyle.SetOptStat(2210)
@@ -40,7 +41,7 @@ ROOT.gPad.Update()
 
 leg.Draw()
 canvas.Draw()
-canvas.SaveAs("gencaloResPlot.png")
+canvas.SaveAs("resocaloResPlot"+run+".png")
 print("Image Saved.")
 
 """

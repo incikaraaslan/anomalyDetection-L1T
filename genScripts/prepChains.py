@@ -10,7 +10,8 @@ def prepChains(directory):
 'newPUChain': ROOT.TChain("inciSNAILv0p1Ntuplizer/pileupTree"),
 'pileupInfo': ROOT.TChain("pileupInformationNtuplizer/pileupInformation"),
 'caloJet': ROOT.TChain("caloStage2JetNtuplizer/L1CaloJetInformation"),
-'genJet': ROOT.TChain("genJetInformationNtuplizer/genJetInformation")}
+'genJet': ROOT.TChain("genJetInformationNtuplizer/genJetInformation"),
+'recoJet': ROOT.TChain("jetCounter/objectInfo")}
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         for chainname in chains:

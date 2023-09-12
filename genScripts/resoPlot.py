@@ -8,7 +8,9 @@ from time import perf_counter
 
 ROOT.gStyle.SetOptStat(0)
 
-m_dir = "/hdfs/store/user/aloelige/TT_TuneCP5_13p6TeV_powheg-pythia8/CICADA_2022_TT_07Jul2023/"
+run = input("Log in the Run A, C, D:")
+m_dir = "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
+# "/hdfs/store/user/aloelige/TT_TuneCP5_13p6TeV_powheg-pythia8/CICADA_2022_TT_07Jul2023/"
 # "/hdfs/store/user/aloelige/ZeroBias/CICADA_2018Run"+run+"_ZB_07Jul2023"
 # "/hdfs/store/user/aloelige/ZeroBias/CICADA_Ztoee_wMINIAOD_RAW_Run"+run+"_08Jun2023/"
 
@@ -21,7 +23,7 @@ for i in range(len(run_list)):
     chains = pc.prepChains(run_list[i])
 
 # Draw the Histogram
-h = ROOT.TH1F("gencaloResPlot", "Resolution Plot", 100, -4.0, 4.0)
+h = ROOT.TH1F("resocaloResPlot", "Resolution Plot", 100, -4.0, 4.0)
 
 # Lists
 cg_matched = []
@@ -30,16 +32,17 @@ cg_unmatched = []
 # Lorentz Vector Matching
 for i in tqdm(range(100000)): # chains['genJet'].GetEntries() - 100000 events if you can
     caloJetptarr = []
-    genJetptarr = []
-    chains['genJet'].GetEntry(i)
+    recoJetptarr = []
+    chains['recoJet'].GetEntry(i)
     chains['caloJet'].GetEntry(i)
     # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
     # start = datetime.now()
     """t1_start = perf_counter()"""
-    for j in range(chains['genJet'].genJetEta.size()):
-        genJet = ROOT.TLorentzVector()
-        genJet.SetPtEtaPhiM(chains['genJet'].genJetPt[j], chains['genJet'].genJetEta[j], chains['genJet'].genJetPhi[j], chains['genJet'].genJetMass[j])
-        genJetptarr.append(genJet)
+    for j in range(chains['recoJet'].etaVector.size()):
+        recoJet = ROOT.TLorentzVector()
+        # genJet.SetPtEtaPhiM(chains['genJet'].genJetPt[j], chains['genJet'].genJetEta[j], chains['genJet'].genJetPhi[j], chains['genJet'].genJetMass[j])
+        recoJet.SetPtEtaPhiM(chains['recoJet'].ptVector[j], chains['recoJet'].etaVector[j], chains['recoJet'].phiVector[j], chains['recoJet'].massVector[j])
+        recoJetptarr.append(recoJet)
     for j in range(chains['caloJet'].etaVector.size()):
         caloJet = ROOT.TLorentzVector()
         caloJet.SetPtEtaPhiM(chains['caloJet'].ptVector[j], chains['caloJet'].etaVector[j], chains['caloJet'].phiVector[j], chains['caloJet'].massVector[j])
@@ -54,14 +57,14 @@ for i in tqdm(range(100000)): # chains['genJet'].GetEntries() - 100000 events if
     j = 0
     """t2_start = perf_counter()"""
     """start3 = datetime.now()"""
-    while tqdm(len(genJetptarr) != 0, leave=False):
+    while tqdm(len(recoJetptarr) != 0, leave=False):
         minindex = None
         delR = None
 
         """t3_start = perf_counter()"""
         """start1 = datetime.now()"""
         for k in range(len(caloJetptarr)):
-            current_delR = ROOT.Math.VectorUtil.DeltaR(genJetptarr[j], caloJetptarr[k])
+            current_delR = ROOT.Math.VectorUtil.DeltaR(recoJetptarr[j], caloJetptarr[k])
             if current_delR > 0.3:
                 continue
              
@@ -85,10 +88,10 @@ for i in tqdm(range(100000)): # chains['genJet'].GetEntries() - 100000 events if
         """t4_start = perf_counter()"""
         """ start2 = datetime.now()"""
         if minindex:
-            cg_matched.append((genJetptarr.pop(0), caloJetptarr.pop(minindex)))
+            cg_matched.append((recoJetptarr.pop(0), caloJetptarr.pop(minindex)))
             # print("Popped!")
         else:
-            cg_unmatched.append(genJetptarr.pop(0))
+            cg_unmatched.append(recoJetptarr.pop(0))
         """end2 = datetime.now()
         td2 = (end2 - start2).total_seconds() * 10**3"""
         # print(f"The time of execution of above program is : {td2:.03f}ms") # 0.03 ms / 0.023
@@ -97,8 +100,8 @@ for i in tqdm(range(100000)): # chains['genJet'].GetEntries() - 100000 events if
         
         # Just in Case :)
         if not caloJetptarr:
-            if genJetptarr:
-                cg_unmatched.append(genJetptarr.pop(0))
+            if recoJetptarr:
+                cg_unmatched.append(recoJetptarr.pop(0))
 
     """t2_stop = perf_counter()
     print("While Loop:", t2_stop-t2_start)""" # 4 ms
@@ -118,8 +121,8 @@ for i in cg_matched:
     reso = (i[1].Pt() - i[0].Pt())/(i[0].Pt())
     h.Fill(reso)
 
-resoh = ROOT.TFile("gencaloResPlot.root", "RECREATE")
-resoh.WriteObject(h, "gencaloResPlot")
+resoh = ROOT.TFile("resocaloResPlot"+run+".root", "RECREATE")
+resoh.WriteObject(h, "resocaloResPlot"+run)
 print("Histogram Created.")
 
 
