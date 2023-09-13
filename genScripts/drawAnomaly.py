@@ -7,8 +7,9 @@ ROOT.gStyle.SetOptStat(2210)
 ROOT.gStyle.SetStatW(0.3)
 ROOT.gStyle.SetStatH(0.105)
 
+run = input("Log in the Run A, C, D:")
 o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genScripts/pileupresos/"
-b = "hp" # "anomalyScore"
+b = run+"hp" # "anomalyScore"
 # newhistFiles/
 a = ["010", "1020", "2030", "3040", "4050", "5060", "6070", "7080"]
 flist = []
@@ -99,6 +100,6 @@ for i in tqdm(range(8)):
     
     leg.Draw()
     canvas.Draw()
-    canvas.SaveAs("./pileupresos/"+pnames[i]+'.png')
+    canvas.SaveAs("./pileupresos/"+run+pnames[i]+'.png')
     leg.Clear()
     canvas.Clear()
