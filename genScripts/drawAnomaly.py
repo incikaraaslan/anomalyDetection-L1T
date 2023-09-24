@@ -32,7 +32,7 @@ lineColors = np.asarray([46, 30]) # , 38, 40
 black = 1
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
 # canvas.SetLogy()
-leg = ROOT.TLegend(0.7, 0.75, 0.87, 0.87)
+leg = ROOT.TLegend(0.7, 0.65, 0.87, 0.77)
 leg.SetBorderSize(1)
 leg.SetFillColor(0)
 leg.SetFillStyle(2)
