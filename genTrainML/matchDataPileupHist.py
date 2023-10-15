@@ -10,7 +10,7 @@ ROOT.gStyle.SetStatH(0.105)
 o = "/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/"
 b = "hp" # "anomalyScore"
 # newhistFiles/
-a = ["010", "1020", "2030", "3040", "4050", "5060", "6070", "7080"]
+a = ["010PURAW", "1020PURAW", "2030PURAW", "3040PURAW", "4050PURAW", "5060PURAW", "6070PURAW", "7080PURAW"]
 flist = []
 # Running the histograms
 # runs = ["A","C","D"]
@@ -53,30 +53,30 @@ for i in tqdm(range(8)):
     #xMax = hist.GetXaxis().GetXmax() * 1.75
     # yMax = hist.GetMaximum() * 1.25
     # hist.SetMaximum(yMax)
-    xmin = 3 * hist.GetXaxis().GetXmin()
-    xmax = hist.GetXaxis().GetXmax()
+    """xmin = 3 * hist.GetXaxis().GetXmin()
+    xmax = 5 * hist.GetXaxis().GetXmax()
     ymin = hist.GetMinimum()
-    ymax = 1.5 * hist.GetMaximum()
+    ymax = 3 * hist.GetMaximum()"""
     
+    hists.append(hist)
+    hists[i].Fit("gaus")
+    fit = hists[i].GetFunction("gaus")
+
+    xmin = 1.5 * fit.GetXaxis().GetXmin()
+    xmax = 3 * fit.GetXaxis().GetXmax()
+    ymin = 1.5 * fit.GetMinimum()
+    ymax = 1.5 * fit.GetMaximum()
     hist.GetXaxis().SetRangeUser(xmin, xmax)
     hist.GetYaxis().SetRangeUser(ymin, ymax)
 
-    
-    hists.append(hist)
     hists[i].Draw("E1")
     leg.AddEntry(hists[i], "True Pileup", "l")
+    leg.AddEntry(fit, "Gaussian Fit True", "l")
     
     # Additional Elts/Fits (if needed)
     l = ROOT.TLine(0.0, 0.0, 0.0, ymax)
-
-
-    hists[i].Fit("gaus")
-    fit = hists[i].GetFunction("gaus")
     l.Draw("SAME")
-    # hists[i].SetStats(1)
 
-    leg.AddEntry(fit, "Gaussian Fit True", "l")
-    # leg.AddEntry(l, "Zero Line")
     ROOT.gPad.Update()
     
     leg.Draw()
