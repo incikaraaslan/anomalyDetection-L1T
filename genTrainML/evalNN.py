@@ -21,7 +21,9 @@ def eval_metric(model, history):
         y-axis
     '''
     plt.plot(history.history['loss'], label='Train')
+    print("Done!")
     plt.plot(history.history['val_loss'], label='Validation')
+    print("Done!")
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.title('Model Loss')
