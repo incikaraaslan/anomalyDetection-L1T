@@ -4,9 +4,9 @@ import os
 
 directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/'
 
-f = ROOT.TFile.Open("./output/calopuppiResPlotPURAW.root", 'READ')
+f = ROOT.TFile.Open("./output/calopuppiResPlotexp.root", 'READ')
 canvas = ROOT.TCanvas('canvas1', '', 500, 500)
-hist = f.Get("calopuppiResPlotPURAW")
+hist = f.Get("calopuppiResPlotexp")
 
 # Formatting
 ROOT.gStyle.SetOptStat(2210)
@@ -40,7 +40,7 @@ ROOT.gPad.Update()
 
 leg.Draw()
 canvas.Draw()
-canvas.SaveAs("calopuppiResPlotPURAW.png")
+canvas.SaveAs("calopuppiResPlotexp.png")
 print("Image Saved.")
 
 """
