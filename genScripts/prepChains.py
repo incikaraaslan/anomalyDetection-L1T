@@ -11,7 +11,11 @@ def prepChains(directory):
 'pileupInfo': ROOT.TChain("pileupInformationNtuplizer/pileupInformation"),
 'caloJet': ROOT.TChain("caloStage2JetNtuplizer/L1CaloJetInformation"),
 'genJet': ROOT.TChain("genJetInformationNtuplizer/genJetInformation"),
-'recoJet': ROOT.TChain("jetCounter/objectInfo")}
+'recoJet': ROOT.TChain("jetCounter/objectInfo"),
+'trigJet': ROOT.TChain("l1UpgradeEmuTree/L1UpgradeTree"),
+'puppiJet': ROOT.TChain("puppiJetNtuplizer/PuppiJets"),
+'regionEt': ROOT.TChain("L1RegionNtuplizer/L1EmuRegions"),
+'PUChainPUPPI': ROOT.TChain("PUVertexNtuplizer/PUVertexNtuple")}
     for filename in os.listdir(directory):
         f = os.path.join(directory, filename)
         for chainname in chains:

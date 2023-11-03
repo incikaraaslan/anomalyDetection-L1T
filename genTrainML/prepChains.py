@@ -21,3 +21,20 @@ def prepChains(filename):
         chains[chainname].Add(filename)
     return chains
 
+tt = ["trainshuf", "testshuf"]
+f = open('output/'+tt[0]+'.txt', 'r')
+score = 0
+score2 = 0
+for x in tqdm(f):
+    x = x[:-1]
+    chains = prepChains(x)
+    """if x[:-1] == "\n":
+        x = x[:-1]
+        chains = prepChains(x)
+    else:
+        chains = prepChains(x)"""
+    score += chains['puppiJet'].GetEntries()
+    score2 += chains['trigJet'].GetEntries()
+
+print(score2)
+print(score)

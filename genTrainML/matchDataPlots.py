@@ -10,7 +10,7 @@ import random
 from time import perf_counter
 import h5py
 
-tt = ["trainnew"] #, "test"]
+tt = ["trainshuf", "testshuf"]
 
 for c in tqdm(range(len(tt))):
     print(tt[c])
@@ -83,7 +83,7 @@ for c in tqdm(range(len(tt))):
 
             for k in range(len(trigJetptarr)):
                 current_delR = ROOT.Math.VectorUtil.DeltaR(puppiJetptarr[j], trigJetptarr[k])
-                if current_delR > 0.3:
+                if current_delR > 0.4:
                     continue
                 
                 if delR == None:
