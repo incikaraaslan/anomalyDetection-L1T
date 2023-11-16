@@ -18,7 +18,7 @@ if gpus:
     print(e)"""
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubfoo_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsub_dataset.h5'
 f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
@@ -79,7 +79,7 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learnCurvephiSubfoo.png")
+plt.savefig("learnCurvephiSub.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
 model.save("PhiSubshuffoo_NN")

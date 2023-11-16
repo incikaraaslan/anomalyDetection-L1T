@@ -25,8 +25,15 @@ for c in tqdm(range(len(tt))):
     et_fortrigmatched = []
     
     # Import Files from Data
-    f = open('output/'+tt[c]+'.txt', 'r')
-    for x in f:
+
+    # Get all of the file
+    # f = open('output/'+tt[c]+'.txt', 'r')
+
+    # Get the first n files from training and test
+    with open('output/'+tt[c]+'.txt', 'r') as f:
+        head = [next(f) for k in range(50)]
+
+    for x in tqdm(head):
         x = x[:-1]
         chains = pc.prepChains(x)
         """print(chains['puppiJet'].GetEntries())
@@ -133,3 +140,8 @@ print("Number of files Training: "+ str(counters[0]) + " Test: " + str(counters[
 print("Number of etaphiring acceptable Training: "+ str(counters[2]) + " Test: " + str(counters[3])) # 17165
 print("Number of matched Training: "+ str(counters[4]) + " Test: " + str(counters[5])) # 1247 SO FEW :=0
 print("File Created.")
+"""
+Number of files Training: 50 Test: 50
+Number of etaphiring acceptable Training: 2907412 Test: 3176483
+Number of matched Training: 245432 Test: 266627
+"""

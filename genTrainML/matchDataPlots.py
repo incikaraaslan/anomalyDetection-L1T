@@ -14,11 +14,6 @@ tt = ["trainshuf", "testshuf"]
 
 for c in tqdm(range(len(tt))):
     print(tt[c])
-    # Import Files from Data
-    f = open('output/'+tt[c]+'.txt', 'r')
-    for x in f:
-        chains = pc.prepChains(x)
-
     # Create the Histogram
     """h = ROOT.TH1F("calopuppiResPlotexp", "Resolution Plot", 100, -4.0, 4.0)"""
 
@@ -41,75 +36,91 @@ for c in tqdm(range(len(tt))):
 
     # For Drawing Pileup Histograms
     truePileuparr = []
+    
+    # Import Files from Data
+
+    # Get all of the file
+    # f = open('output/'+tt[c]+'.txt', 'r')
+
+    # Get the first n files from training and test
+    with open('output/'+tt[c]+'.txt', 'r') as f:
+        head = [next(f) for k in range(20)]
+
+    for x in tqdm(head):
+        x = x[:-1]
+        chains = pc.prepChains(x)
+        """print(chains['puppiJet'].GetEntries())
+        print(chains['trigJet'].GetEntries())"""
+    
 
 
-    # Next: what iPhi ring in the regions the trigger jet we have just used belongs to
-    # Then: get the regions that correspond to this ring from my quick ntuplizer for the regions L1RegionNtuplizer 
-    # (stored in iEta then iPhi indices ([14][18]), you may have to reconstruct it from flat). 
-    # For now, simply take every phi energy deposit across the ring (all 18). 
+        # Next: what iPhi ring in the regions the trigger jet we have just used belongs to
+        # Then: get the regions that correspond to this ring from my quick ntuplizer for the regions L1RegionNtuplizer 
+        # (stored in iEta then iPhi indices ([14][18]), you may have to reconstruct it from flat). 
+        # For now, simply take every phi energy deposit across the ring (all 18). 
 
-    # Match Jet with PUPPI
-    for i in tqdm(range(chains['trigJet'].GetEntries())): # chains['genJet'].GetEntries() - 100000 events if you can
-        trigJetptarr = []
-        puppiJetptarr = []
-        chains['puppiJet'].GetEntry(i)
-        chains['trigJet'].GetEntry(i)
-        chains['regionEt'].GetEntry(i)
+        # Match Jet with PUPPI
+        for i in tqdm(range(chains['puppiJet'].GetEntries())): # chains['genJet'].GetEntries() - 100000 events if you can
+            trigJetptarr = []
+            puppiJetptarr = []
+            chains['puppiJet'].GetEntry(i)
+            chains['trigJet'].GetEntry(i)
+            chains['regionEt'].GetEntry(i)
 
-        # For Drawing Pileup Histograms
-        chains['PUChainPUPPI'].GetEntry(i)
-        truePileup = chains['PUChainPUPPI'].npv
-        
-        # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
-        for j in range(chains['puppiJet'].etaVector.size()):
-            puppiJet = ROOT.TVector3()
-            puppiJet.SetPtEtaPhi(chains['puppiJet'].ptVector[j], chains['puppiJet'].etaVector[j], chains['puppiJet'].phiVector[j])
-            puppiJetptarr.append(puppiJet)
-        for j in range(chains['trigJet'].jetEta.size()):
-            # Create the trigJet vectors
-            trigJet = ROOT.TVector3()
-            # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
-            # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
-            jetEt = chains['trigJet'].jetRawEt[j] * 0.5
-            trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
-            trigJetptarr.append(trigJet)
+            # For Drawing Pileup Histograms
+            chains['PUChainPUPPI'].GetEntry(i)
+            truePileup = chains['PUChainPUPPI'].npv
+            
+            # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
+            for j in range(chains['puppiJet'].etaVector.size()):
+                puppiJet = ROOT.TVector3()
+                puppiJet.SetPtEtaPhi(chains['puppiJet'].ptVector[j], chains['puppiJet'].etaVector[j], chains['puppiJet'].phiVector[j])
+                puppiJetptarr.append(puppiJet)
+            for j in range(chains['trigJet'].jetEta.size()):
+                # Create the trigJet vectors
+                trigJet = ROOT.TVector3()
+                # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
+                # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
+                jetEt = chains['trigJet'].jetRawEt[j] * 0.5
+                trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
+                trigJetptarr.append(trigJet)
 
-        
-        # Matching vectors via deltaR < 0.3
-        j = 0
-        while tqdm(len(puppiJetptarr) != 0, leave=False):
-            minindex = None
-            delR = None
+            
+            # Matching vectors via deltaR < 0.3
+            j = 0
+            while tqdm(len(puppiJetptarr) != 0, leave=False):
+                minindex = None
+                delR = None
 
-            for k in range(len(trigJetptarr)):
-                current_delR = ROOT.Math.VectorUtil.DeltaR(puppiJetptarr[j], trigJetptarr[k])
-                if current_delR > 0.4:
-                    continue
-                
-                if delR == None:
-                    delR = current_delR
-                    minindex = k
-                
-                else:
-                    if current_delR < delR:
+                for k in range(len(trigJetptarr)):
+                    current_delR = ROOT.Math.VectorUtil.DeltaR(puppiJetptarr[j], trigJetptarr[k])
+                    if current_delR > 0.4:
+                        continue
+                    
+                    if delR == None:
                         delR = current_delR
                         minindex = k
+                    
                     else:
-                        continue
-            
-            # Place into matched and unmatched
-            if minindex:
-                cg_matched.append((puppiJetptarr.pop(0), trigJetptarr.pop(minindex)))
-                # For Matching Pileup
-                truePileuparr.append(truePileup)
-            else:
-                cg_unmatched.append(puppiJetptarr.pop(0))
-
-            
-            # Just in Case :)
-            if not trigJetptarr:
-                if puppiJetptarr:
+                        if current_delR < delR:
+                            delR = current_delR
+                            minindex = k
+                        else:
+                            continue
+                
+                # Place into matched and unmatched
+                if minindex:
+                    cg_matched.append((puppiJetptarr.pop(0), trigJetptarr.pop(minindex)))
+                    # For Matching Pileup
+                    truePileuparr.append(truePileup)
+                else:
                     cg_unmatched.append(puppiJetptarr.pop(0))
+
+                
+                # Just in Case :)
+                if not trigJetptarr:
+                    if puppiJetptarr:
+                        cg_unmatched.append(puppiJetptarr.pop(0))
 
     # Draw the Histogram
     """for i in cg_matched:
