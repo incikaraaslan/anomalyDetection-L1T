@@ -18,7 +18,7 @@ if gpus:
     print(e)"""
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsub_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubfast_dataset.h5'
 f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
@@ -35,7 +35,7 @@ y_train = f['PuppiTrigEtDifftrainshuf'][:]
 f.close()
 
 
-x_train, x_val, y_train, y_val = skms.train_test_split(x_train, y_train, test_size=0.20, random_state =1234)
+x_train, x_val, y_train, y_val = skms.train_test_split(x_train, y_train, test_size=0.10, train_size = 0.90, random_state =1234)
 """num_rows = len(x_test)
 num_columns = len(x_test[0]) 
 shape = (num_rows, num_columns)
@@ -82,5 +82,5 @@ eval_metric(model, trainHistory)
 plt.savefig("learnCurvephiSub.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-model.save("PhiSubshuffoo_NN")
+model.save("PhiSubshuffast_NN")
 print("Done!")
