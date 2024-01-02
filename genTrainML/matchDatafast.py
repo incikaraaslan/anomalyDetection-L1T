@@ -115,9 +115,6 @@ for c in tqdm(range(len(tt))):
                     for iPhi in range(18):
                         etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
                     counters[c+2] += 1
-                    if etList == []:
-                        print(jet_iEta)
-                    
                 else:
                     continue
                 
@@ -137,25 +134,28 @@ for c in tqdm(range(len(tt))):
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
-            if cg_matched != []:
-                tcg_matched.append(cg_matched)
-                ttrig_unmatched.append(trig_unmatched)
-                tpuppi_unmatched.append(tpuppi_unmatched)
-                tet_fortrigmatched.append(et_fortrigmatched)
+            tcg_matched.append(cg_matched)
+            ttrig_unmatched.append(trig_unmatched)
+            tpuppi_unmatched.append(tpuppi_unmatched)
+            tet_fortrigmatched.append(et_fortrigmatched)
 
     # Construct the HDF5 Dataset
     # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
     y = []
+    print(tcg_matched, tet_fortrigmatched)
+    print(len(tcg_matched), len(tet_fortrigmatched))
     for i in tcg_matched:
+        print(i)
         y.append(i[0][1].Pt() - i[0][0].Pt())
+    print(len(y))
 
     # Input: The energy deposit across the Phi Ring --> et_fortrigmatched
-    x = []
-    for a in range(len(tet_fortrigmatched)):
+    """x = []"""
+    """for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
-            x.append(tet_fortrigmatched[a][b])
-    print(len(x), len(y))
-    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
+            x.append(tet_fortrigmatched[a][b])"""
+    print(len(tet_fortrigmatched), len(y))
+    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=tet_fortrigmatched)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)
     f.close()
     
