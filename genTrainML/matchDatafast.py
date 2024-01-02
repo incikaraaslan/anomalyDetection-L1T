@@ -114,26 +114,25 @@ for c in tqdm(range(len(tt))):
                     etList = []
                     for iPhi in range(18):
                         etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
-                    counters[c+2] += 1
+                    if etList == []:
+                        print("Empty:")
+                        print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
+                    else:
+                        et_fortrig.append(etList)
                 else:
                     continue
-                
+
                 # Create the trigJet vectors
                 trigJet = ROOT.TVector3()
                 # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
                 # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
                 jetEt = chains['trigJet'].jetRawEt[j] * 0.5
                 trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
-
-                if etList == []:
-                    print(jet_iEta)
-                    print(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
-                if etList != []:
-                    et_fortrig.append(etList)
-                    trigJetptarr.append(trigJet)
+                trigJetptarr.append(trigJet)
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
+            """if cg_matched != []:"""
             tcg_matched.append(cg_matched)
             ttrig_unmatched.append(trig_unmatched)
             tpuppi_unmatched.append(tpuppi_unmatched)
@@ -142,20 +141,19 @@ for c in tqdm(range(len(tt))):
     # Construct the HDF5 Dataset
     # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
     y = []
-    print(tcg_matched, tet_fortrigmatched)
     print(len(tcg_matched), len(tet_fortrigmatched))
+    print(tcg_matched[1:100])
+    print(tet_fortrigmatched[1:100])
     for i in tcg_matched:
-        print(i)
         y.append(i[0][1].Pt() - i[0][0].Pt())
-    print(len(y))
 
     # Input: The energy deposit across the Phi Ring --> et_fortrigmatched
-    """x = []"""
-    """for a in range(len(tet_fortrigmatched)):
+    x = []
+    for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
-            x.append(tet_fortrigmatched[a][b])"""
-    print(len(tet_fortrigmatched), len(y))
-    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=tet_fortrigmatched)
+            x.append(tet_fortrigmatched[a][b])
+    print(len(y), len(x))
+    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)
     f.close()
     
