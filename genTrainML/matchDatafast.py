@@ -12,24 +12,27 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsubfast_dataset.h5'
+hdf5_file_name = 'phiringsubtestsub_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
-
+counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
     unmatchedPuppiJets = []
     unmatchedTriggerJets = triggerJets
     matchedJets = []
     et_fortrigmatched = []
+    # print("Start Matching!")
     for puppiJetIndex, puppiJet in enumerate(puppiJets):
         distances = []
         for triggerJetIndex, triggerJet in enumerate(unmatchedTriggerJets):
             distances.append((triggerJetIndex, puppiJet.DeltaR(triggerJet)))
         distances.sort(key=lambda x: x[1])
+        # print(distances)
         # Sort the distances, and remove any trigger jets that don't meet our criteria.
         for i in range(len(distances)):
             if distances[i][1] > 0.4:
                 distances = distances[:i]
                 break
+        # print(distances)
         # if we have no appropriate trigger jets at this point, this is an unmatched puppi jet
         if len(distances) == 0:
             unmatchedPuppiJets.append(puppiJet)
@@ -39,22 +42,30 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
         highestPt = 0.0
         highestIndex = None
         for triggerJetIndex, DeltaR in distances:
+            # print(triggerJetIndex, DeltaR)
+            # print(unmatchedTriggerJets[triggerJetIndex].Pt())
+
             if unmatchedTriggerJets[triggerJetIndex].Pt() > highestPt:
                 highestIndex = triggerJetIndex
-        triggerJet = unmatchedTriggerJets.pop(highestIndex)
-        et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
-        matchedJets.append((triggerJet, puppiJet))
+        if highestIndex:
+            triggerJet = unmatchedTriggerJets.pop(highestIndex)
+            """for i in range(len(energyfortrigs[highestIndex])):"""
+            matchedJets.append((triggerJet, puppiJet))
+            et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
+            counters[c+4] += 1
+        """if len(matchedJets) == 5:
+            print(et_fortrigmatched)
+            break"""
     return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched
 
 
 for c in tqdm(range(len(tt))):
     print(tt[c])
     # Lists
-    cg_matched = []
-    trig_unmatched = []
-    puppi_unmatched = []
-    et_fortrigmatched = []
-    
+    tcg_matched = []
+    ttrig_unmatched = []
+    tpuppi_unmatched = []
+    tet_fortrigmatched = []
     # Import Files from Data
 
     # Get all of the file
@@ -62,13 +73,14 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(50)]
+        head = [next(f) for k in range(2)]
 
     for x in tqdm(head):
         x = x[:-1]
         chains = pc.prepChains(x)
         """print(chains['puppiJet'].GetEntries())
         print(chains['trigJet'].GetEntries())"""
+        counters[c] += 1
 
         # Match Jet with PUPPI
         for i in tqdm(range(chains['puppiJet'].GetEntries())): # chains['genJet'].GetEntries() - 100000 events if you can
@@ -100,36 +112,53 @@ for c in tqdm(range(len(tt))):
                 if 0 <= jet_regionIndex <= 13:
                     #print(chains['regionEt'].regionEt.size())
                     etList = []
+                    # Create the trigJet vectors
+                    trigJet = ROOT.TVector3()
+                    # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
+                    # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
+                    jetEt = chains['trigJet'].jetRawEt[j] * 0.5
+                    trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
+
                     for iPhi in range(18):
                         etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
-                    et_fortrig.append(etList)
+                    counters[c+2] += 1
+                    if etList == []:
+                        print(jet_iEta)
+                        print(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
+                    if etList != []:
+                        et_fortrig.append(etList)
+                        trigJetptarr.append(trigJet)
+                    
                 else:
                     continue
 
-                # Create the trigJet vectors
-                trigJet = ROOT.TVector3()
-                # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
-                # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
-                jetEt = chains['trigJet'].jetRawEt[j] * 0.5
-                trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
-                trigJetptarr.append(trigJet)
-    
-    
-    # Matching vectors via deltaR < 0.4
-    cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
-    
-    
+            # Matching vectors via deltaR < 0.4
+            cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
+            if cg_matched != []:
+                tcg_matched.append(cg_matched)
+                ttrig_unmatched.append(trig_unmatched)
+                tpuppi_unmatched.append(tpuppi_unmatched)
+                tet_fortrigmatched.append(et_fortrigmatched)
+
     # Construct the HDF5 Dataset
     # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
     y = []
-    for i in cg_matched:
-        y.append(i[1].Pt() - i[0].Pt())
+    for i in tcg_matched:
+        y.append(i[0][1].Pt() - i[0][0].Pt())
 
     # Input: The energy deposit across the Phi Ring --> et_fortrigmatched
-    print(et_fortrigmatched, y)
-    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=et_fortrigmatched)
+    x = []
+    for a in range(len(tet_fortrigmatched)):
+        for b in range(len(tet_fortrigmatched[a])):
+            x.append(tet_fortrigmatched[a][b])
+    print(len(x), len(y))
+    hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)
     f.close()
     
 hdf5_file.close()
+print("Number of files Training: "+ str(counters[0]) + " Test: " + str(counters[1])) # 595 # 149
+print("Number of etaphiring acceptable Training: "+ str(counters[2]) + " Test: " + str(counters[3])) # 17165
+print("Number of matched Training: "+ str(counters[4]) + " Test: " + str(counters[5])) # 1247 SO FEW :=0
+print("File Created.")
 print("File Created.")
