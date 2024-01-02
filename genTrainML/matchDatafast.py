@@ -112,25 +112,28 @@ for c in tqdm(range(len(tt))):
                 if 0 <= jet_regionIndex <= 13:
                     #print(chains['regionEt'].regionEt.size())
                     etList = []
-                    # Create the trigJet vectors
-                    trigJet = ROOT.TVector3()
-                    # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
-                    # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
-                    jetEt = chains['trigJet'].jetRawEt[j] * 0.5
-                    trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
-
                     for iPhi in range(18):
                         etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
                     counters[c+2] += 1
                     if etList == []:
                         print(jet_iEta)
-                        print(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
-                    if etList != []:
-                        et_fortrig.append(etList)
-                        trigJetptarr.append(trigJet)
                     
                 else:
                     continue
+                
+                # Create the trigJet vectors
+                trigJet = ROOT.TVector3()
+                # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
+                # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
+                jetEt = chains['trigJet'].jetRawEt[j] * 0.5
+                trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
+
+                if etList == []:
+                    print(jet_iEta)
+                    print(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
+                if etList != []:
+                    et_fortrig.append(etList)
+                    trigJetptarr.append(trigJet)
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
