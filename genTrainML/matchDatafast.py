@@ -12,7 +12,7 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsubtestsub_dataset.h5'
+hdf5_file_name = 'phiringsub_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
@@ -47,12 +47,12 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
 
             if unmatchedTriggerJets[triggerJetIndex].Pt() > highestPt:
                 highestIndex = triggerJetIndex
-        if highestIndex:
-            triggerJet = unmatchedTriggerJets.pop(highestIndex)
-            """for i in range(len(energyfortrigs[highestIndex])):"""
-            matchedJets.append((triggerJet, puppiJet))
-            et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
-            counters[c+4] += 1
+        
+        triggerJet = unmatchedTriggerJets.pop(highestIndex)
+        """for i in range(len(energyfortrigs[highestIndex])):"""
+        matchedJets.append((triggerJet, puppiJet))
+        et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
+        counters[c+4] += 1
         """if len(matchedJets) == 5:
             print(et_fortrigmatched)
             break"""
@@ -73,7 +73,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(2)]
+        head = [next(f) for k in range(50)]
 
     for x in tqdm(head):
         x = x[:-1]
@@ -119,6 +119,7 @@ for c in tqdm(range(len(tt))):
                         print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
                     else:
                         et_fortrig.append(etList)
+                        counters[c+2] += 1
                 else:
                     continue
 
@@ -132,34 +133,33 @@ for c in tqdm(range(len(tt))):
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
-            """if cg_matched != []:"""
-            tcg_matched.append(cg_matched)
-            ttrig_unmatched.append(trig_unmatched)
-            tpuppi_unmatched.append(tpuppi_unmatched)
-            tet_fortrigmatched.append(et_fortrigmatched)
+            if cg_matched != []:
+                tcg_matched.append(cg_matched)
+                ttrig_unmatched.append(trig_unmatched)
+                tpuppi_unmatched.append(tpuppi_unmatched)
+                tet_fortrigmatched.append(et_fortrigmatched)
 
     # Construct the HDF5 Dataset
-    # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
-    y = []
-    print(len(tcg_matched), len(tet_fortrigmatched))
-    print(tcg_matched[1:100])
-    print(tet_fortrigmatched[1:100])
-    for i in tcg_matched:
-        y.append(i[0][1].Pt() - i[0][0].Pt())
+    print(len(tcg_matched), len(tet_fortrigmatched)) # 46790 46790 # 7064 7064
 
     # Input: The energy deposit across the Phi Ring --> et_fortrigmatched
     x = []
     for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
             x.append(tet_fortrigmatched[a][b])
-    print(len(y), len(x))
+    # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
+    y = []
+    for i in range(len(tcg_matched)):
+        for j in range(len(tet_fortrigmatched[i])):
+            y.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
+    print(len(y), len(x)) #7064 8153 multiple ET regions for a PUPPI jet value --> 
     hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)
     f.close()
     
 hdf5_file.close()
-print("Number of files Training: "+ str(counters[0]) + " Test: " + str(counters[1])) # 595 # 149
-print("Number of etaphiring acceptable Training: "+ str(counters[2]) + " Test: " + str(counters[3])) # 17165
-print("Number of matched Training: "+ str(counters[4]) + " Test: " + str(counters[5])) # 1247 SO FEW :=0
+print("Number of files Training: "+ str(counters[0]) + " Test: " + str(counters[1])) 
+print("Number of etaphiring acceptable Training: "+ str(counters[2]) + " Test: " + str(counters[3])) 
+print("Number of matched Training: "+ str(counters[4]) + " Test: " + str(counters[5])) 
 print("File Created.")
 print("File Created.")

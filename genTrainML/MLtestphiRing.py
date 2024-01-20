@@ -23,7 +23,7 @@ f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
 x_test = f['PhiRingEttestshuf'][:]
-x_train = f['PhiRingEttrainshuf'][:] # 7573 1247
+x_train = f['PhiRingEttrainshuf'][:]
 print(len(x_train), [len(a) for a in x_train])
 x_train = x_train.reshape(-1, 18, 1, 1) #(1, 18, 1) # len() = 7573
 x_test = x_test.reshape(-1, 18, 1, 1) # len() = 1247
@@ -81,8 +81,8 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learnCurvephiSub.png")
+plt.savefig("learningCurvephiSub.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-model.save("PhiSubshufsub_NN")
+model.save("PhiSub_NN")
 print("Done!")
