@@ -58,7 +58,7 @@ DConv1D = partial(tf.keras.layers.Conv1D, kernel_size = 7, strides = 1, padding 
 model = tf.keras.Sequential(
     [
         DConv1D(filters = 16, input_shape = (18,1)),
-        # tf.keras.layers.Flatten(), 
+        tf.keras.layers.Flatten(), 
         tf.keras.layers.Dense(units = 32, activation = "relu"),
         tf.keras.layers.Dense(units = 32, activation = "relu"),
         tf.keras.layers.Dense(units  = 1) # linear combination: y < 0. ReLU(a*x_1 + b*x_2+... w_n*x_n) >= 0, 
@@ -89,8 +89,8 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learningCurvephiSubtesttt.png")
+plt.savefig("learningCurvephiSub-2l-u32-bs128-ks7-s1-flatten.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-model.save("PhiRingSubtesttt_NN")
+model.save("PhiRingSubfoo_NN")
 print("Done!")
