@@ -31,7 +31,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(50)]
+        head = [next(f) for k in range(100)]
 
     for x in tqdm(head):
         x = x[:-1]

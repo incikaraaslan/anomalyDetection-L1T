@@ -18,22 +18,24 @@ if gpus:
     print(e)"""
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubtestsub_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsub100_dataset.h5'
 f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
 x_test = f['PhiRingEttestshuf'][:]
 x_train = f['PhiRingEttrainshuf'][:]
-print(len(x_train), [len(a) for a in x_train])
-x_train = x_train.reshape(-1, 18, 1, 1) #(1, 18, 1) # len() = 7573
-x_test = x_test.reshape(-1, 18, 1, 1) # len() = 1247
-"""print(x_train, x_test)
-print(len(x_train), len(x_test))"""
+x_train = x_train.reshape(-1, 18, 1) #(1, 18, 1) # len() = 7573
+x_test = x_test.reshape(-1, 18, 1) # len() = 1247"""
+print(np.shape(x_train), np.shape(x_test))
+print(x_train)
 
 
 y_test = f['PuppiTrigEtDifftestshuf'][:]
 y_train = f['PuppiTrigEtDifftrainshuf'][:]
-print(len(y_train), [len(a) for a in y_train])
+y_train = y_train.reshape(-1, 1)
+y_test = y_test.reshape(-1, 1)
+print(np.shape(y_train), np.shape(y_test))
+print(y_train)
 f.close()
 
 
@@ -43,16 +45,22 @@ num_columns = len(x_test[0])
 shape = (num_rows, num_columns)
 print(shape)"""
 
+# Hyperparameter Scan
+# https://keras.io/keras_tuner/
+# Data might not be predictive. Larger phi areas, areas around the jet, try to be more predictive. 
+# With my test set of trigger jets and puppi jets, how big is the average error, run some predictive,
+# Corrective TRIG jet pt v. PUPPI jet pt to check, make historgrams average error, pt spectrum of the actual puppi things
 
 # Model Construction
 # Thin Wrapper for Keras Conv2D callable in order to call on the activation function etc.
-DConv1D = partial(tf.keras.layers.Conv1D, kernel_size = 3, strides = 2, padding = "same", activation = "relu")
+DConv1D = partial(tf.keras.layers.Conv1D, kernel_size = 7, strides = 1, padding = "same", activation = "relu")
 # Group the linear stack of layers into a tf.keras.Model
 model = tf.keras.Sequential(
     [
-        DConv1D(filters = 4, input_shape = (18,1, 1)),
+        DConv1D(filters = 16, input_shape = (18,1)),
         # tf.keras.layers.Flatten(), 
-        tf.keras.layers.Dense(units = 20, activation = "relu"),
+        tf.keras.layers.Dense(units = 32, activation = "relu"),
+        tf.keras.layers.Dense(units = 32, activation = "relu"),
         tf.keras.layers.Dense(units  = 1) # linear combination: y < 0. ReLU(a*x_1 + b*x_2+... w_n*x_n) >= 0, 
         # but a*x_1 + b*x_2 + ... w_n*x_n can be any value depending on the weights!
     ]
@@ -66,7 +74,7 @@ model.compile(loss = "mean_squared_error", metrics = ["RootMeanSquaredError"])
 trainHistory = model.fit(
     x_train, 
     y_train, 
-    batch_size = 32, 
+    batch_size = 128, 
     epochs = 10,
     validation_data=(x_val,y_val)
 )
@@ -81,8 +89,8 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learningCurvephiSub.png")
+plt.savefig("learningCurvephiSubtesttt.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-model.save("PhiSub_NN")
+model.save("PhiRingSubtesttt_NN")
 print("Done!")
