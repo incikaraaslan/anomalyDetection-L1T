@@ -32,8 +32,8 @@ print(x_train)
 
 y_test = f['PuppiTrigEtDifftestshuf'][:]
 y_train = f['PuppiTrigEtDifftrainshuf'][:]
-y_train = y_train.reshape(-1, 1)
-y_test = y_test.reshape(-1, 1)
+y_train = y_train.reshape(-1, 1, 1)
+y_test = y_test.reshape(-1, 1, 1)
 print(np.shape(y_train), np.shape(y_test))
 print(y_train)
 f.close()
@@ -92,5 +92,5 @@ eval_metric(model, trainHistory)
 plt.savefig("learningCurvephiSub-2l-u32-bs128-ks7-s1-flatten.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-model.save("PhiRingSubfoo_NN")
+model.save("PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN")
 print("Done!")
