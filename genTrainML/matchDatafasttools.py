@@ -16,8 +16,6 @@ tt = ["trainshuf", "testshuf"]
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
 hjets = ROOT.TH1F("Total Number of Jets", "Total Number of Jets", 100000, 0.0, 1000000.0)
 hmatched = ROOT.TH1F("Number of Matched Jets", "Number of Matched Jets", 100000, 0.0, 10000000.0)
-hdf5_file_name = 'phiringsub100_dataset.h5'
-hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs, tjet):
     unmatchedPuppiJets = []
@@ -129,8 +127,8 @@ for c in tqdm(range(len(tt))):
                         et_fortrig.append(etList)
 
                         # Fill for Total Jets
-                        tjet.append(chains['trigJet'].nJets)
-                        hjets.Fill(chains['trigJet'].nJets)
+                        tjet.append(chains['trigJet'].L1Upgrade.nJets)
+                        hjets.Fill(chains['trigJet'].L1Upgrade.nJets)
                         counters[c+2] += 1
                 else:
                     continue
