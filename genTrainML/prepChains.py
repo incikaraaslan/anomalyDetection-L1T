@@ -15,7 +15,8 @@ def prepChains(filename):
 'trigJet': ROOT.TChain("l1UpgradeEmuTree/L1UpgradeTree"),
 'puppiJet': ROOT.TChain("puppiJetNtuplizer/PuppiJets"),
 'regionEt': ROOT.TChain("L1RegionNtuplizer/L1EmuRegions"),
-'PUChainPUPPI': ROOT.TChain("PUVertexNtuplizer/PUVertexNtuple")}
+'PUChainPUPPI': ROOT.TChain("PUVertexNtuplizer/PUVertexNtuple"),
+'caloTower': ROOT.TChain("l1CaloTowerTree/L1CaloTowerTree")}
     # f = os.path.join(directory, filename)
     for chainname in chains:
         chains[chainname].Add(filename)

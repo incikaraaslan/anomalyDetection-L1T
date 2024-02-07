@@ -26,10 +26,11 @@ y_train = f['PuppiTrigEtDifftrainshuf'][:]
 y_train = y_train.reshape(-1, 1)
 y_test = y_test.reshape(-1, 1)
 
-# Draw Histograms
-# Histogram of the Predicted and True Distribution of pT
 y_trainpred = model.predict(x_train)
 y_testpred = model.predict(x_test)
+
+# Draw Histograms
+"""# Histogram of the Predicted and True Distribution of pT
 value_range = (-20,30)
 
 # Training
@@ -72,4 +73,11 @@ plt.ylabel('Frequency')
 plt.legend()
 
 # Save the plot
-plt.savefig('ErrorPUPPITrigvSNAILTrig'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')
+plt.savefig('ErrorPUPPITrigvSNAILTrig'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')"""
+
+# TRIG jet + SNAIL correction v. Puppi jet Pt
+print(len(y_train), y_train)
+"""phiringet = []
+for i in range(len(y_train)):
+    if i == 0:
+        phiringet.append()"""

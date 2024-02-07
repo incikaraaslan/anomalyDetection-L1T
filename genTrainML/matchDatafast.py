@@ -12,7 +12,7 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsub100_dataset.h5'
+hdf5_file_name = 'phiringsubfoo_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
@@ -133,6 +133,7 @@ for c in tqdm(range(len(tt))):
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
+            print(cg_matched, et_fortrigmatched)
             if cg_matched != []:
                 tcg_matched.append(cg_matched)
                 ttrig_unmatched.append(trig_unmatched)

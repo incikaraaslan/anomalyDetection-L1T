@@ -14,15 +14,12 @@ import h5py
 tt = ["trainshuf", "testshuf"]
 
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
-hjets = ROOT.TH1F("Total Number of Jets", "Total Number of Jets", 100000, 0.0, 1000000.0)
-hmatched = ROOT.TH1F("Number of Matched Jets", "Number of Matched Jets", 100000, 0.0, 10000000.0)
 counters = [0, 0, 0, 0, 0, 0]
-def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs, tjet):
+def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
     unmatchedPuppiJets = []
     unmatchedTriggerJets = triggerJets
     matchedJets = []
     et_fortrigmatched = []
-    tjetmatched = []
     # print("Start Matching!")
     for puppiJetIndex, puppiJet in enumerate(puppiJets):
         distances = []
@@ -52,7 +49,6 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs, tjet):
                 highestIndex = triggerJetIndex
         
         triggerJet = unmatchedTriggerJets.pop(highestIndex)
-        tjetmatched = tjet.pop(highestIndex)
     
         """for i in range(len(energyfortrigs[highestIndex])):"""
         matchedJets.append((triggerJet, puppiJet))
@@ -61,13 +57,12 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs, tjet):
         """if len(matchedJets) == 5:
             print(et_fortrigmatched)
             break"""
-    return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched, tjetmatched
+    return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched
 
 
 for c in tqdm(range(len(tt))):
     print(tt[c])
     # Lists
-    tjet = []
     tcg_matched = []
     ttrig_unmatched = []
     tpuppi_unmatched = []
@@ -79,7 +74,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(100)]
+        head = [next(f) for k in range(10)]
 
     for x in tqdm(head):
         x = x[:-1]
@@ -97,6 +92,7 @@ for c in tqdm(range(len(tt))):
             chains['puppiJet'].GetEntry(i)
             chains['trigJet'].GetEntry(i)
             chains['regionEt'].GetEntry(i)
+            chains['PUChainPUPPI'].GetEntry(i)
         
             # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
             for j in range(chains['puppiJet'].etaVector.size()):
@@ -125,10 +121,6 @@ for c in tqdm(range(len(tt))):
                         print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
                     else:
                         et_fortrig.append(etList)
-
-                        # Fill for Total Jets
-                        tjet.append(chains['trigJet'].L1Upgrade.nJets)
-                        hjets.Fill(chains['trigJet'].L1Upgrade.nJets)
                         counters[c+2] += 1
                 else:
                     continue
@@ -142,7 +134,7 @@ for c in tqdm(range(len(tt))):
                 trigJetptarr.append(trigJet)
 
             # Matching vectors via deltaR < 0.4
-            cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched, tjetmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig, tjet)
+            cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
             if cg_matched != []:
                 tcg_matched.append(cg_matched)
                 ttrig_unmatched.append(trig_unmatched)
@@ -150,27 +142,10 @@ for c in tqdm(range(len(tt))):
                 tet_fortrigmatched.append(et_fortrigmatched)
 
     # Draw Histograms
-    # Ratio of Number of Matched to the Total Number of Events
-    for i in range(len(tjetmatched)):
-        hmatched.Fill(tjetmatched[i])
-    
-    hmatchedvtotal = hmatched.Clone()
-    hmatchedvtotal.Divide(hjets)
-
-    hmatchedvtotal.SetMarkerStyle(8)
-    hmatchedvtotal.SetMarkerSize(0.2)
-    hmatchedvtotal.SetTitle("")
-    hmatchedvtotal.GetYaxis().SetTitle("Frequency")
-    hmatchedvtotal.GetXaxis().SetTitle("Ratio of Matched to Total Jets")
-    hmatchedvtotal.GetXaxis().SetTitleSize(0.045)
-    hmatchedvtotal.GetXaxis().SetTitleOffset(1.1)
-    hmatchedvtotal.GetYaxis().SetTitleSize(0.045)
-    hmatchedvtotal.GetYaxis().SetTitleOffset(1.0)
-
-    hmatchedvtotal.Draw()
-    canvas.Draw()
-    canvas.SaveAs("matchedvtotal"+tt[c]+".png")
-    canvas.Clear()
+    # Total PhiRing E_t v npv
+    for a in range(len(tet_fortrigmatched)):
+        for b in range(len(tet_fortrigmatched[a])):
+            print(tet_fortrigmatched[a][b])
 
     # Average/Absolute pt, eta, phi error for matched jets
     """pterror = []
