@@ -26,6 +26,8 @@ y_train = f['PuppiTrigEtDifftrainshuf'][:]
 y_train = y_train.reshape(-1, 1)
 y_test = y_test.reshape(-1, 1)
 
+print(len(x_train), len(x_test))
+print(len(y_train), len(y_test))
 y_trainpred = model.predict(x_train)
 y_testpred = model.predict(x_test)
 
@@ -75,9 +77,3 @@ plt.legend()
 # Save the plot
 plt.savefig('ErrorPUPPITrigvSNAILTrig'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')"""
 
-# TRIG jet + SNAIL correction v. Puppi jet Pt
-print(len(y_train), y_train)
-"""phiringet = []
-for i in range(len(y_train)):
-    if i == 0:
-        phiringet.append()"""

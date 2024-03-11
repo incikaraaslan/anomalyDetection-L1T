@@ -73,7 +73,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(100)]
+        head = [next(f) for k in range(2)]
 
     for x in tqdm(head):
         x = x[:-1]
@@ -133,7 +133,7 @@ for c in tqdm(range(len(tt))):
 
             # Matching vectors via deltaR < 0.4
             cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
-            print(cg_matched, et_fortrigmatched)
+            # print(cg_matched, et_fortrigmatched)
             if cg_matched != []:
                 tcg_matched.append(cg_matched)
                 ttrig_unmatched.append(trig_unmatched)
@@ -153,6 +153,7 @@ for c in tqdm(range(len(tt))):
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             y.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
+            print(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
     print(len(y), len(x)) #7064 8153 multiple ET regions for a PUPPI jet value --> 
     hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)

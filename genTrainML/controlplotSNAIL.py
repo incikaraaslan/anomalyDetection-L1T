@@ -38,24 +38,31 @@ for i in range(len(run_list)):
 # Canvas and Formatting
 canvas = ROOT.TCanvas('C', 'Canvas', 500, 500)
 hcalnpv = ROOT.TH2F("nHCALtpvnpv", "nHCALtp v. npv", 100, 0.0, 80, 100, 0.0, 1200)
-totaletnpv = ROOT.TH2F("totalEtvnpv", "totalEt v. npv", 100, 0.0, 80, 100, 0.0, 30e6)
+totalhcaletnpv = ROOT.TH2F("totalhcalEtvnpv", "totalhcaltpEt v. npv", 100, 0.0, 80, 100, 0.0, 1500)
+totalhecaletnpv = ROOT.TH2F("totalhcalecalEtvnpv", "total hcal+ecal tpEt v. npv", 100, 0.0, 80, 100, 0.0, 1700)
 # phiringetnpv = ROOT.TH1F("PUPPI P_T", "P_T (GeV)", 100, 0.0, 170.0)
 npv = []
 for i in tqdm(range(chains['PUChainPUPPI'].GetEntries())):
     hcaltpet = 0.0
+    ecaltpet = 0.0
     chains['PUChainPUPPI'].GetEntry(i)
     chains['caloTower'].GetEntry(i)
 
     hcalnpv.Fill(chains['PUChainPUPPI'].npv, chains['caloTower'].CaloTP.nHCALTP)
     for j in range(chains['caloTower'].CaloTP.hcalTPet.size()):
         hcaltpet += chains['caloTower'].CaloTP.hcalTPet[j]
+
+    for j in range(chains['caloTower'].CaloTP.ecalTPet.size()):
+        ecaltpet += chains['caloTower'].CaloTP.ecalTPet[j]
     
-    totaletnpv.Fill(chains['PUChainPUPPI'].npv, hcaltpet)
-    
+    totalhcaletnpv.Fill(chains['PUChainPUPPI'].npv, hcaltpet)
+    totalhecaletnpv.Fill(chains['PUChainPUPPI'].npv, hcaltpet + ecaltpet)
     """for j in range(chains['caloTower'].nHCALTP.size()):
         npv.append(chains['PUChainPUPPI'].npv[j])
         nHCALTP.append(chains['caloTower'].nHCALTP[j])"""
 
+hcalnpv.Fit("pol1")
+hcalnpv.GetFunction("pol1").SetLineColor(1)
 hcalnpv.SetLineColor(46)
 hcalnpv.SetMarkerColor(46)
 hcalnpv.SetMarkerStyle(8)
@@ -67,29 +74,48 @@ hcalnpv.GetXaxis().SetTitleSize(0.045)
 hcalnpv.GetXaxis().SetTitleOffset(0.9)
 hcalnpv.GetYaxis().SetTitleSize(0.045)
 hcalnpv.GetYaxis().SetTitleOffset(0.9)
-hcalnpv.Draw("HIST")
+hcalnpv.Draw("COLZ")
 canvas.Draw()
 canvas.SaveAs('controlPlots/nHCALtpvnpv.png')
 print("Hist 1 Done.")
 
 canvas.Clear()
 
-totaletnpv.SetLineColor(46)
-totaletnpv.SetMarkerColor(46)
-totaletnpv.SetMarkerStyle(8)
-totaletnpv.SetMarkerSize(0.5)
-totaletnpv.SetTitle("jetEt v. npv")
-totaletnpv.GetXaxis().SetTitle("npv")
-totaletnpv.GetYaxis().SetTitle("jetEt")
-totaletnpv.GetXaxis().SetTitleSize(0.045)
-totaletnpv.GetXaxis().SetTitleOffset(0.9)
-totaletnpv.GetYaxis().SetTitleSize(0.045)
-totaletnpv.GetYaxis().SetTitleOffset(0.9)
-totaletnpv.Draw("HIST")
+totalhcaletnpv.Fit("pol1")
+totalhcaletnpv.GetFunction("pol1").SetLineColor(1)
+totalhcaletnpv.SetLineColor(46)
+totalhcaletnpv.SetMarkerColor(46)
+totalhcaletnpv.SetMarkerStyle(8)
+totalhcaletnpv.SetMarkerSize(0.5)
+totalhcaletnpv.SetTitle("Total HCALTp E_t v. npv")
+totalhcaletnpv.GetXaxis().SetTitle("npv")
+totalhcaletnpv.GetYaxis().SetTitle("Total HCALTp")
+totalhcaletnpv.GetXaxis().SetTitleSize(0.045)
+totalhcaletnpv.GetXaxis().SetTitleOffset(0.9)
+totalhcaletnpv.GetYaxis().SetTitleSize(0.045)
+totalhcaletnpv.GetYaxis().SetTitleOffset(0.9)
+totalhcaletnpv.Draw("COLZ")
 canvas.Draw()
-canvas.SaveAs('controlPlots/jetEtvnpv.png')
+canvas.SaveAs('controlPlots/totalhcaltpet.png')
 print("Hist 2 Done.")
 
-    
+canvas.Clear()
+totalhecaletnpv.Fit("pol1")
+totalhecaletnpv.GetFunction("pol1").SetLineColor(1)
+totalhecaletnpv.SetLineColor(46)
+totalhecaletnpv.SetMarkerColor(46)
+totalhecaletnpv.SetMarkerStyle(8)
+totalhecaletnpv.SetMarkerSize(0.5)
+totalhecaletnpv.SetTitle("Total ECAL + HCALTp E_t v. npv")
+totalhecaletnpv.GetXaxis().SetTitle("npv")
+totalhecaletnpv.GetYaxis().SetTitle("Total ECAL + HCALTp")
+totalhecaletnpv.GetXaxis().SetTitleSize(0.045)
+totalhecaletnpv.GetXaxis().SetTitleOffset(0.9)
+totalhecaletnpv.GetYaxis().SetTitleSize(0.045)
+totalhecaletnpv.GetYaxis().SetTitleOffset(0.9)
+totalhecaletnpv.Draw("COLZ")
+canvas.Draw()
+canvas.SaveAs('controlPlots/totalhecaltpet.png')
+print("Hist 3 Done.")
 
 
