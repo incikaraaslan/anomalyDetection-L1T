@@ -15,13 +15,14 @@ tt = ["trainshuf", "testshuf"]
 
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
 counters = [0, 0, 0, 0, 0, 0]
+delputrigvnpv = ROOT.TH2F("delputrigvnpv", "del(PUPPI P_T, TRIG P_T) v. npv", 100, 0.0, 80, 100, -20.0, 20)
 hcaldelputrig = ROOT.TH2F("nHCALtpvEtdelputrig", "nHCALtp v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 1200)
 totalhcaletdelputrig = ROOT.TH2F("totalhcalEtvEtdelputrig", "totalhcaltpEt v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 1500)
-"""phiringetnpv = ROOT.TH2F("phiringEtnpv", "totalphiringEt v. npv", 100, 0.0, 70, 100, 0.0, 300)
+phiringetnpv = ROOT.TH2F("phiringEtnpv", "totalphiringEt v. npv", 100, 0.0, 70, 100, 0.0, 300)
 phiringetdelputrig = ROOT.TH2F("phiringEtdelputrig", "totalphiringEt v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 300)
 phiringsubtrigetnpv = ROOT.TH2F("phiringsubtrigEtnpv", "Total (phiring-trigiphi) E_T v. npv", 100, 0.0, 70, 100, 0.0, 300)
 phiringsubtrigetputrig = ROOT.TH2F("phiringsubtrigEtnpv", "Total (phiring-trigiphi) E_T v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 300)
-"""
+
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
     unmatchedPuppiJets = []
     indexunmatched = []
@@ -58,8 +59,6 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
                 highestIndex = triggerJetIndex
         
         triggerJet = unmatchedTriggerJets.pop(highestIndex)
-    
-        """for i in range(len(energyfortrigs[highestIndex])):"""
         matchedJets.append((triggerJet, puppiJet))
         et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
         counters[c+4] += 1
@@ -86,8 +85,8 @@ for c in tqdm(range(len(tt))):
     tet_fortrigmatched = []
     tindexunmatched = []
     t_npv = []
-    t_hcaltpet = []
-    t_nHCALTP = []
+    """t_hcaltpet = []
+    t_nHCALTP = []"""
     # Import Files from Data
 
     # Get all of the file
@@ -95,7 +94,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(1)]
+        head = [next(f) for k in range(100)]
 
     for x in tqdm(head):
         x = x[:-1]
@@ -108,8 +107,8 @@ for c in tqdm(range(len(tt))):
             puppiJetptarr = []
             et_fortrig = []
             npvs = []
-            hcaltpets = []
-            nHCALTPs = []
+            """hcaltpets = []
+            nHCALTPs = []"""
 
             chains['puppiJet'].GetEntry(i)
             chains['trigJet'].GetEntry(i)
@@ -119,26 +118,20 @@ for c in tqdm(range(len(tt))):
             
             # Singular Calculation
             npv = chains['PUChainPUPPI'].npv
-            nHCALTP = chains['caloTower'].CaloTP.nHCALTP
+            """nHCALTP = chains['caloTower'].CaloTP.nHCALTP
             hcaltpet = 0.0
             for j in range(chains['caloTower'].CaloTP.hcalTPet.size()):
-                hcaltpet += chains['caloTower'].CaloTP.hcalTPet[j]
+                hcaltpet += chains['caloTower'].CaloTP.hcalTPet[j]"""
             
-            
-            """print("Set 1")
-            print(npv)
-            print(chains['puppiJet'].etaVector.size())
-            print(chains['trigJet'].jetEta.size())
-            print(chains['puppiJet'].etaVector)
-            print(chains['trigJet'].jetEta)"""
+        
             # Each p_t, eta, phi, transverse mass entry has multiple jets in the form of vector<double>.
             for j in range(chains['puppiJet'].etaVector.size()):
                 puppiJet = ROOT.TVector3()
                 puppiJet.SetPtEtaPhi(chains['puppiJet'].ptVector[j], chains['puppiJet'].etaVector[j], chains['puppiJet'].phiVector[j])
                 puppiJetptarr.append(puppiJet)
                 npvs.append(npv)
-                hcaltpets.append(hcaltpet)
-                nHCALTPs.append(nHCALTP)
+                """hcaltpets.append(hcaltpet)
+                nHCALTPs.append(nHCALTP)"""
             
             for j in range(chains['trigJet'].jetEta.size()):
                 # Preparing Dataset
@@ -209,20 +202,19 @@ for c in tqdm(range(len(tt))):
             for index in sorted(indexunmatched, reverse=True):
                 if 0 <= index < len(npvs):
                     del npvs[index]
-                    del hcaltpets[index]
-                    del nHCALTPs[index]
+                    """del hcaltpets[index]
+                    del nHCALTPs[index]"""
             if npvs != []:
                 t_npv.append(npvs)
-                t_hcaltpet.append(hcaltpets)
-                t_nHCALTP.append(nHCALTPs)
+                """t_hcaltpet.append(hcaltpets)
+                t_nHCALTP.append(nHCALTPs)"""
             # print(len(t_npv), t_npv)
             # print(len(npvs), npvs)
                      
             
     # Draw Histograms
-    # HCALEt and nHCALTP v. Del(PUPPI - TRIG) P_T
-
-    delputrig = []
+# HCALEt and nHCALTP v. Del(PUPPI - TRIG) P_T
+    """delputrig = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
@@ -282,19 +274,22 @@ for c in tqdm(range(len(tt))):
     canvas.Draw()
     canvas.SaveAs('controlPlots/hcaldelputrig'+str(tt[c])+'.png')
     print("Hist 2 Done.")
+    """
 
-
-    # PhiRing Circle E_t v Del(PUPPI - TRIG) P_T
+# PhiRing Circle E_t v Del(PUPPI - TRIG) P_T
     """summ = []
     for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
             summ.append(np.sum(np.asarray(tet_fortrigmatched[a][b])))
 
     delputrig = []
+    
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
     
+    print(len(summ), len(delputrig))
+
     for a in range(len(summ)):
         phiringetdelputrig.Fill(delputrig[a], summ[a])
     
@@ -316,10 +311,10 @@ for c in tqdm(range(len(tt))):
     canvas.SaveAs('controlPlots/phiringcircetdelputrig'+str(tt[c])+'.png')
     print("Hist 1 Done.")
 
-    canvas.Clear()
+    canvas.Clear()"""
 
-    # PhiRing Circle E_t v npv
-    summ = []
+# PhiRing Circle E_t v npv
+    """summ = []
     for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
             summ.append(np.sum(np.asarray(tet_fortrigmatched[a][b])))
@@ -351,7 +346,8 @@ for c in tqdm(range(len(tt))):
     canvas.Draw()
     canvas.SaveAs('controlPlots/phiringetnpv'+str(tt[c])+'.png')
     print("Hist 2 Done.")"""
-    # Total PhiRing E_t v Del(PUPPI - TRIG) P_T
+
+# Total PhiRing E_t v Del(PUPPI - TRIG) P_T
     """
     summ = []
     for a in range(len(tet_fortrigmatched)):
@@ -421,7 +417,7 @@ for c in tqdm(range(len(tt))):
     print("Hist 2 Done.")
     """
     
-    # Total PhiRing E_T - Subtract Energy where the Trig Jet Landed v npv
+# Total PhiRing E_T - Subtract Energy where the Trig Jet Landed v npv
     """summ = []
     for a in range(len(tet_fortrigmatched)):
         for b in range(len(tet_fortrigmatched[a])):
@@ -490,8 +486,95 @@ for c in tqdm(range(len(tt))):
     canvas.Draw()
     canvas.SaveAs('controlPlots/ELphiringsubtrigetputrig'+str(tt[c])+'.png')
     print("Hist 2 Done.")"""
+
+# Del(PUPPI - TRIG) P_T v. npv
+    npvss =[]
+    for a in range(len(t_npv)):
+        for b in range(len(t_npv[a])):
+            npvss.append(t_npv[a][b])
+
+    delputrig = []
+    for i in range(len(tcg_matched)):
+        for j in range(len(tet_fortrigmatched[i])):
+            delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
     
-    # Save ROOT File
+    print(len(delputrig), len(npvss))
+
+    a = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    b = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]
+    f = [0,0,0,0,0,0,0,0]
+    for i in range(len(delputrig)):
+        if 0 <= npvss[i] <= 10:
+            f[0] += 1
+            a[0] += npvss[i]
+            b[0] += delputrig[i]
+        if 10 < npvss[i] <= 20:
+            f[1] += 1
+            a[1] += npvss[i]
+            b[1] += delputrig[i]
+        if 20 < npvss[i] <= 30:
+            f[2] += 1
+            a[2] += npvss[i]
+            b[2] += delputrig[i]
+        if 30 < npvss[i] <= 40:
+            f[3] += 1
+            a[3] += npvss[i]
+            b[3] += delputrig[i]
+        if 40 < npvss[i] <= 50:
+            f[4] += 1
+            a[4] += npvss[i]
+            b[4] += delputrig[i]
+        if 50 < npvss[i] <= 60:
+            f[5] += 1
+            a[5] += npvss[i]
+            b[5] += delputrig[i]
+        if 60 < npvss[i] <= 70:
+            f[6] += 1
+            a[6] += npvss[i]
+            b[6] += delputrig[i]
+        if 70 < npvss[i] <= 80:
+            f[7] += 1
+            a[7] += npvss[i]
+            b[7] += delputrig[i]
+
+    for i in range(len(b)):
+        delputrigvnpv.Fill(np.asarray(a[i])/np.asarray(f[i]), np.asarray(b[i])/np.asarray(f[i]))
+        
+    delputrigvnpv.SetLineColor(46)
+    delputrigvnpv.SetMarkerColor(46)
+    delputrigvnpv.SetMarkerStyle(8)
+    delputrigvnpv.SetMarkerSize(0.5)
+    delputrigvnpv.SetTitle("Averaged del(PUPPI P_T, TRIG P_T) v. npv")
+    delputrigvnpv.GetXaxis().SetTitle("npv")
+    delputrigvnpv.GetYaxis().SetTitle("Averaged Del(PUPPI - TRIG) P_T")
+    delputrigvnpv.GetXaxis().SetTitleSize(0.045)
+    delputrigvnpv.GetXaxis().SetTitleOffset(0.9)
+    delputrigvnpv.GetYaxis().SetTitleSize(0.045)
+    delputrigvnpv.GetYaxis().SetTitleOffset(0.9)
+    delputrigvnpv.Draw("PLC PMC")
+    canvas.Draw()
+    canvas.SaveAs('controlPlots/delputrigvnpvlinedhist'+str(tt[c])+'.png')
+    print("Hist 1 Done.")
+    canvas.Clear()
+
+    delputrigvnpv.SetLineColor(46)
+    delputrigvnpv.SetMarkerColor(46)
+    delputrigvnpv.SetMarkerStyle(8)
+    delputrigvnpv.SetMarkerSize(0.5)
+    delputrigvnpv.SetTitle("Averaged del(PUPPI P_T, TRIG P_T) v. npv")
+    delputrigvnpv.GetXaxis().SetTitle("npv")
+    delputrigvnpv.GetYaxis().SetTitle("Averaged Del(PUPPI - TRIG) P_T")
+    delputrigvnpv.GetXaxis().SetTitleSize(0.045)
+    delputrigvnpv.GetXaxis().SetTitleOffset(0.9)
+    delputrigvnpv.GetYaxis().SetTitleSize(0.045)
+    delputrigvnpv.GetYaxis().SetTitleOffset(0.9)
+    delputrigvnpv.Draw("PLC PMC")
+    canvas.Draw()
+    canvas.SaveAs('controlPlots/avgdelputrigvnpvnolinehist'+str(tt[c])+'.png')
+    print("Hist 2 Done.")
+    
+
+# Save ROOT File
     """matchDatatools = ROOT.TFile("controlPlots/tools3"+str(tt[c])+".root", "RECREATE")
     matchDatatools.WriteObject(phiringetdelputrig, "phiringetdelputrig"+str(tt[c]))
     matchDatatools.WriteObject(phiringetnpv, "phiringetnpv"+str(tt[c]))
@@ -499,7 +582,7 @@ for c in tqdm(range(len(tt))):
     matchDatatools.WriteObject(phiringsubtrigetputrig, "phiringsubtrigetnpv"+str(tt[c]))
     print("Histograms and ROOT file Created.")"""
 
-    # Average/Absolute pt, eta, phi error for matched jets
+# Average/Absolute pt, eta, phi error for matched jets
     """pterror = []
     etaerror = []
     phierror = []
