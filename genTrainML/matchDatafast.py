@@ -12,7 +12,7 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsubfoo_dataset.h5'
+hdf5_file_name = 'phiringsubnewJetEt_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
@@ -127,7 +127,8 @@ for c in tqdm(range(len(tt))):
                 trigJet = ROOT.TVector3()
                 # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
                 # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
-                jetEt = chains['trigJet'].jetRawEt[j] * 0.5
+                # (jetRawEt - jetPUEt)*0.5*(8/7)
+                jetEt = (chains['trigJet'].jetRawEt[j]-chains['trigJet'].jetPUEt[j]) * 0.5 * 8/7
                 trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
                 trigJetptarr.append(trigJet)
 
