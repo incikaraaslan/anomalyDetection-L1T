@@ -18,7 +18,7 @@ if gpus:
     print(e)"""
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsub100_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubnewJetEt_dataset.h5'
 f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
@@ -60,7 +60,7 @@ model = tf.keras.Sequential(
         DConv1D(filters = 16, input_shape = (18,1)),
         tf.keras.layers.Flatten(), 
         tf.keras.layers.Dense(units = 32, activation = "relu"),
-        tf.keras.layers.Dense(units = 32, activation = "relu"),
+        # tf.keras.layers.Dense(units = 32, activation = "relu"),
         tf.keras.layers.Dense(units  = 1) # linear combination: y < 0. ReLU(a*x_1 + b*x_2+... w_n*x_n) >= 0, 
         # but a*x_1 + b*x_2 + ... w_n*x_n can be any value depending on the weights!
     ]
@@ -89,9 +89,9 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learningCurvephiSub-2l-u32-bs128-ks7-s1-flatten.png")
+plt.savefig("learningCurvephiSub-1l-u32-bs128-ks7-s1-flatten.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
 tf.keras.utils.plot_model(model, to_file="phiSub-2l-u32-bs128-ks7-s1-flatten.png", show_shapes=True)
-model.save("PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN")
+model.save("PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN")
 print("Done!")

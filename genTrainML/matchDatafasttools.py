@@ -12,23 +12,27 @@ import matplotlib.pyplot as plt
 import h5py
 
 tt = ["trainshuf", "testshuf"]
+threshold = input("Input a Threshold for Selecting Calo Regions (int, GeV):")
+
 
 canvas = ROOT.TCanvas('canvas', '', 500, 500)
 counters = [0, 0, 0, 0, 0, 0]
+npvvnoregions = ROOT.TH2F("npvvnoregions", "npv v. Regions",  100, 0.0, 80, 100, 0.0, 40)
+delputrigvnoregions = ROOT.TH2F("delputrigvnoregions", "del(PUPPI P_T, TRIG P_T) v. Regions",  100, -40.0, 40, 100, 0.0, 40)
 delputrigvnpv = ROOT.TH2F("delputrigvnpv", "del(PUPPI P_T, TRIG P_T) v. npv", 100, 0.0, 80, 100, -20.0, 20)
-hcaldelputrig = ROOT.TH2F("nHCALtpvEtdelputrig", "nHCALtp v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 1200)
-totalhcaletdelputrig = ROOT.TH2F("totalhcalEtvEtdelputrig", "totalhcaltpEt v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 1500)
+hcalecaldelputrig = ROOT.TH2F("nHCALECALtpvEtdelputrig", "nHCALtp + nECALtp v. del(PUPPI P_T, TRIG P_T)", 100, -20.0, 40, 100, 0.0, 2000)
 phiringetnpv = ROOT.TH2F("phiringEtnpv", "totalphiringEt v. npv", 100, 0.0, 70, 100, 0.0, 300)
 phiringetdelputrig = ROOT.TH2F("phiringEtdelputrig", "totalphiringEt v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 300)
 phiringsubtrigetnpv = ROOT.TH2F("phiringsubtrigEtnpv", "Total (phiring-trigiphi) E_T v. npv", 100, 0.0, 70, 100, 0.0, 300)
 phiringsubtrigetputrig = ROOT.TH2F("phiringsubtrigEtnpv", "Total (phiring-trigiphi) E_T v. del(PUPPI P_T, TRIG P_T)", 100, -70.0, 70, 100, 0.0, 300)
 
-def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
+def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs, rcounter_fortrig):
     unmatchedPuppiJets = []
     indexunmatched = []
     unmatchedTriggerJets = triggerJets
     matchedJets = []
     et_fortrigmatched = []
+    rcounter_fortrigmatched = []
     # print("Start Matching!")
     for puppiJetIndex, puppiJet in enumerate(puppiJets):
         distances = []
@@ -61,11 +65,12 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
         triggerJet = unmatchedTriggerJets.pop(highestIndex)
         matchedJets.append((triggerJet, puppiJet))
         et_fortrigmatched.append(energyfortrigs.pop(highestIndex))
+        rcounter_fortrigmatched.append(rcounter_fortrig.pop(highestIndex))
         counters[c+4] += 1
         """if len(matchedJets) == 5:
             print(et_fortrigmatched)
             break"""
-    return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched, indexunmatched
+    return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched, indexunmatched, rcounter_fortrigmatched
 
 def circleofPhi(iPhi, jet_regionIndex):
     if iPhi*14 <= (iPhi*14 + jet_regionIndex) <= iPhi*14 + 13:
@@ -85,8 +90,8 @@ for c in tqdm(range(len(tt))):
     tet_fortrigmatched = []
     tindexunmatched = []
     t_npv = []
-    """t_hcaltpet = []
-    t_nHCALTP = []"""
+    trcounter = []
+    t_nHCALECALTP = []
     # Import Files from Data
 
     # Get all of the file
@@ -106,9 +111,9 @@ for c in tqdm(range(len(tt))):
             trigJetptarr = []
             puppiJetptarr = []
             et_fortrig = []
+            rcounter_fortrig = []
             npvs = []
-            """hcaltpets = []
-            nHCALTPs = []"""
+            nHCALECALTPs = []
 
             chains['puppiJet'].GetEntry(i)
             chains['trigJet'].GetEntry(i)
@@ -118,8 +123,8 @@ for c in tqdm(range(len(tt))):
             
             # Singular Calculation
             npv = chains['PUChainPUPPI'].npv
-            """nHCALTP = chains['caloTower'].CaloTP.nHCALTP
-            hcaltpet = 0.0
+            nHCALECALTP = chains['caloTower'].CaloTP.nHCALTP + chains['caloTower'].CaloTP.nECALTP
+            """hcaltpet = 0.0
             for j in range(chains['caloTower'].CaloTP.hcalTPet.size()):
                 hcaltpet += chains['caloTower'].CaloTP.hcalTPet[j]"""
             
@@ -130,8 +135,8 @@ for c in tqdm(range(len(tt))):
                 puppiJet.SetPtEtaPhi(chains['puppiJet'].ptVector[j], chains['puppiJet'].etaVector[j], chains['puppiJet'].phiVector[j])
                 puppiJetptarr.append(puppiJet)
                 npvs.append(npv)
-                """hcaltpets.append(hcaltpet)
-                nHCALTPs.append(nHCALTP)"""
+                """hcaltpets.append(hcaltpet)"""
+                nHCALECALTPs.append(nHCALECALTP)
             
             for j in range(chains['trigJet'].jetEta.size()):
                 # Preparing Dataset
@@ -148,10 +153,18 @@ for c in tqdm(range(len(tt))):
                 if 0 <= jet_regionIndex <= 13:
                     # print(chains['regionEt'].regionEt.size())
                     etList = []
+                    rcounter = 0
                     trigiPhi = round((chains['trigJet'].jetIPhi[j]-jet_regionIndex)/14)
                     for iPhi in range(18):
                         # No Subtraction where the Trigger Jet Hits
                         etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
+                        
+                        # No Subtraction + Accepts only above a set Threshold:
+                        if chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex] >= int(threshold):
+                            # etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
+                            rcounter += 1
+                        else:
+                            continue
 
                         # Subtract where the Trigger Jet Hits
                         """if iPhi == trigiPhi:
@@ -176,6 +189,7 @@ for c in tqdm(range(len(tt))):
                         print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
                     else:
                         et_fortrig.append(etList)
+                        rcounter_fortrig.append(rcounter)
                         # print(et_fortrig, len(et_fortrig))
                         counters[c+2] += 1
                 else:
@@ -186,95 +200,69 @@ for c in tqdm(range(len(tt))):
                 # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
                 # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
                 jetEt = chains['trigJet'].jetRawEt[j] * 0.5
+                # jetEt = (chains['trigJet'].jetRawEt[j]-chains['trigJet'].jetPUEt[j]) * 0.5 * 8/7
                 trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
                 trigJetptarr.append(trigJet)
 
             # Matching vectors via deltaR < 0.4
-            cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched, indexunmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig)
+            cg_matched, trig_unmatched, puppi_unmatched, et_fortrigmatched, indexunmatched, rcounter_fortrigmatched = createMatchedAndUnmatchedJets(trigJetptarr, puppiJetptarr, et_fortrig, rcounter_fortrig)
             indexunmatched = np.asarray(indexunmatched)
             if cg_matched != []:
                 tcg_matched.append(cg_matched)
                 ttrig_unmatched.append(trig_unmatched)
                 tpuppi_unmatched.append(tpuppi_unmatched)
                 tet_fortrigmatched.append(et_fortrigmatched)
+                trcounter.append(rcounter_fortrigmatched)
         
             # print(indexunmatched, npvs)
             for index in sorted(indexunmatched, reverse=True):
                 if 0 <= index < len(npvs):
                     del npvs[index]
-                    """del hcaltpets[index]
-                    del nHCALTPs[index]"""
+                    """del hcaltpets[index]"""
+                    del nHCALECALTPs[index]
             if npvs != []:
                 t_npv.append(npvs)
-                """t_hcaltpet.append(hcaltpets)
-                t_nHCALTP.append(nHCALTPs)"""
+                """t_hcaltpet.append(hcaltpets)"""
+                t_nHCALECALTP.append(nHCALECALTPs)
             # print(len(t_npv), t_npv)
             # print(len(npvs), npvs)
                      
             
     # Draw Histograms
-# HCALEt and nHCALTP v. Del(PUPPI - TRIG) P_T
-    """delputrig = []
+# nHCALTP+nECALTP v. Del(PUPPI - TRIG) P_T
+    delputrig = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
     
-    hcaltpetss =[]
-    for a in range(len(t_hcaltpet)):
-        for b in range(len(t_hcaltpet[a])):
-            hcaltpetss.append(t_hcaltpet[a][b])
-    
-    nHCALTPss =[]
-    for a in range(len(t_nHCALTP)):
-        for b in range(len(t_nHCALTP[a])):
-            hcaltpetss.append(t_nHCALTP[a][b])
+    nHCALECALTPss =[]
+    for a in range(len(t_nHCALECALTP)):
+        for b in range(len(t_nHCALECALTP[a])):
+            nHCALECALTPss.append(t_nHCALECALTP[a][b])
 
-    print(len(delputrig), len(hcaltpetss), len(nHCALTPss))
-    
-    for a in range(len(hcaltpetss)):
-        totalhcaletdelputrig.Fill(delputrig[a], hcaltpetss[a])
+    print(len(delputrig), len(nHCALECALTPss))
 
-    totalhcaletdelputrig.Fit("pol1")
-    totalhcaletdelputrig.GetFunction("pol1").SetLineColor(1)
-    totalhcaletdelputrig.SetLineColor(46)
-    totalhcaletdelputrig.SetMarkerColor(46)
-    totalhcaletdelputrig.SetMarkerStyle(8)
-    totalhcaletdelputrig.SetMarkerSize(0.5)
-    totalhcaletdelputrig.SetTitle("HCAL E_T v. Del(PUPPI - TRIG) P_T")
-    totalhcaletdelputrig.GetXaxis().SetTitle("Del(PUPPI - TRIG) P_T")
-    totalhcaletdelputrig.GetYaxis().SetTitle("HCAL E_T")
-    totalhcaletdelputrig.GetXaxis().SetTitleSize(0.045)
-    totalhcaletdelputrig.GetXaxis().SetTitleOffset(0.9)
-    totalhcaletdelputrig.GetYaxis().SetTitleSize(0.045)
-    totalhcaletdelputrig.GetYaxis().SetTitleOffset(0.9)
-    totalhcaletdelputrig.Draw("COLZ")
+    for a in range(len(nHCALECALTPss)):
+        hcalecaldelputrig.Fill(delputrig[a], nHCALECALTPss[a])
+
+    hcalecaldelputrig.SetLineColor(46)
+    hcalecaldelputrig.SetMarkerColor(46)
+    hcalecaldelputrig.SetMarkerStyle(8)
+    hcalecaldelputrig.SetMarkerSize(0.5)
+    hcalecaldelputrig.SetTitle("nHCALTP+ nECALTP v. Del(PUPPI - TRIG) P_T")
+    hcalecaldelputrig.GetXaxis().SetTitle("Del(PUPPI - TRIG) P_T")
+    hcalecaldelputrig.GetYaxis().SetTitle("nHCALTP + nECALTP")
+    hcalecaldelputrig.GetXaxis().SetTitleSize(0.045)
+    hcalecaldelputrig.GetXaxis().SetTitleOffset(0.9)
+    hcalecaldelputrig.GetYaxis().SetTitleSize(0.045)
+    hcalecaldelputrig.GetYaxis().SetTitleOffset(0.9)
+    hcalecaldelputrig.Draw("COLZ")
     canvas.Draw()
-    canvas.SaveAs('controlPlots/totalhcaletdelputrig'+str(tt[c])+'.png')
-    print("Hist 1 Done.")
+    canvas.SaveAs('controlPlots/hcalecaldelputrig'+str(tt[c])+'.png')
+    print("Hist 0 Done.")
 
     canvas.Clear()
-
-    for a in range(len(nHCALTPss)):
-        hcaldelputrig.Fill(delputrig[a], nHCALTPss[a])
-
-    hcaldelputrig.Fit("pol1")
-    hcaldelputrig.GetFunction("pol1").SetLineColor(1)
-    hcaldelputrig.SetLineColor(46)
-    hcaldelputrig.SetMarkerColor(46)
-    hcaldelputrig.SetMarkerStyle(8)
-    hcaldelputrig.SetMarkerSize(0.5)
-    hcaldelputrig.SetTitle("nHCALTP E_T v. Del(PUPPI - TRIG) P_T")
-    hcaldelputrig.GetXaxis().SetTitle("Del(PUPPI - TRIG) P_T")
-    hcaldelputrig.GetYaxis().SetTitle("nHCALTP E_T")
-    hcaldelputrig.GetXaxis().SetTitleSize(0.045)
-    hcaldelputrig.GetXaxis().SetTitleOffset(0.9)
-    hcaldelputrig.GetYaxis().SetTitleSize(0.045)
-    hcaldelputrig.GetYaxis().SetTitleOffset(0.9)
-    hcaldelputrig.Draw("COLZ")
-    canvas.Draw()
-    canvas.SaveAs('controlPlots/hcaldelputrig'+str(tt[c])+'.png')
-    print("Hist 2 Done.")
-    """
+    
 
 # PhiRing Circle E_t v Del(PUPPI - TRIG) P_T
     """summ = []
@@ -488,7 +476,7 @@ for c in tqdm(range(len(tt))):
     print("Hist 2 Done.")"""
 
 # Del(PUPPI - TRIG) P_T v. npv
-    npvss =[]
+    """npvss =[]
     for a in range(len(t_npv)):
         for b in range(len(t_npv[a])):
             npvss.append(t_npv[a][b])
@@ -553,26 +541,74 @@ for c in tqdm(range(len(tt))):
     delputrigvnpv.GetYaxis().SetTitleOffset(0.9)
     delputrigvnpv.Draw("PLC PMC")
     canvas.Draw()
-    canvas.SaveAs('controlPlots/delputrigvnpvlinedhist'+str(tt[c])+'.png')
+    canvas.SaveAs('controlPlots/avgdelputrigvnpv'+str(tt[c])+'.png')
     print("Hist 1 Done.")
+    canvas.Clear()"""
+
+# Del(PUPPI - TRIG) P_T v. Number of RegionEt Above Threshold
+    delputrig = []
+    for i in range(len(tcg_matched)):
+        for j in range(len(tet_fortrigmatched[i])):
+            delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
+        
+    summ = []
+    for a in range(len(trcounter)):
+        for b in range(len(trcounter[a])):
+            summ.append(np.sum(np.asarray(trcounter[a][b])))
+    
+    print(len(summ), len(delputrig))
+    for a in range(len(delputrig)):
+        delputrigvnoregions.Fill(delputrig[a], summ[a])
+    
+    delputrigvnoregions.SetLineColor(46)
+    delputrigvnoregions.SetMarkerColor(46)
+    delputrigvnoregions.SetMarkerStyle(8)
+    delputrigvnoregions.SetMarkerSize(0.5)
+    delputrigvnoregions.SetTitle("# RegionEt >" + str(threshold) + "GeV del(PUPPI P_T, TRIG P_T)")
+    delputrigvnoregions.GetYaxis().SetTitle("# RegionEt >" + str(threshold) + "GeV")
+    delputrigvnoregions.GetXaxis().SetTitle("del(PUPPI P_T, TRIG P_T)")
+    delputrigvnoregions.GetXaxis().SetTitleSize(0.045)
+    delputrigvnoregions.GetXaxis().SetTitleOffset(0.9)
+    delputrigvnoregions.GetYaxis().SetTitleSize(0.045)
+    delputrigvnoregions.GetYaxis().SetTitleOffset(0.9)
+    delputrigvnoregions.Draw("COLZ")
+    canvas.Draw()
+    canvas.SaveAs('controlPlots/delputrigvnoregions'+str(threshold)+'colz'+str(tt[c])+'.png')
+    print("Hist 1 Done.")
+
     canvas.Clear()
 
-    delputrigvnpv.SetLineColor(46)
-    delputrigvnpv.SetMarkerColor(46)
-    delputrigvnpv.SetMarkerStyle(8)
-    delputrigvnpv.SetMarkerSize(0.5)
-    delputrigvnpv.SetTitle("Averaged del(PUPPI P_T, TRIG P_T) v. npv")
-    delputrigvnpv.GetXaxis().SetTitle("npv")
-    delputrigvnpv.GetYaxis().SetTitle("Averaged Del(PUPPI - TRIG) P_T")
-    delputrigvnpv.GetXaxis().SetTitleSize(0.045)
-    delputrigvnpv.GetXaxis().SetTitleOffset(0.9)
-    delputrigvnpv.GetYaxis().SetTitleSize(0.045)
-    delputrigvnpv.GetYaxis().SetTitleOffset(0.9)
-    delputrigvnpv.Draw("PLC PMC")
-    canvas.Draw()
-    canvas.SaveAs('controlPlots/avgdelputrigvnpvnolinehist'+str(tt[c])+'.png')
-    print("Hist 2 Done.")
+# npv v. Number of RegionEt Above Threshold
+    npvss =[]
+    for a in range(len(t_npv)):
+        for b in range(len(t_npv[a])):
+            npvss.append(t_npv[a][b])
     
+    summ = []
+    for a in range(len(trcounter)):
+        for b in range(len(trcounter[a])):
+            summ.append(np.sum(np.asarray(trcounter[a][b])))
+
+    for a in range(len(delputrig)):
+        npvvnoregions.Fill(delputrig[a], summ[a])
+    
+    npvvnoregions.SetLineColor(46)
+    npvvnoregions.SetMarkerColor(46)
+    npvvnoregions.SetMarkerStyle(8)
+    npvvnoregions.SetMarkerSize(0.5)
+    npvvnoregions.SetTitle("# RegionEt >" + str(threshold) + "GeV del(PUPPI P_T, TRIG P_T)")
+    npvvnoregions.GetYaxis().SetTitle("# RegionEt >" + str(threshold) + "GeV")
+    npvvnoregions.GetXaxis().SetTitle("del(PUPPI P_T, TRIG P_T)")
+    npvvnoregions.GetXaxis().SetTitleSize(0.045)
+    npvvnoregions.GetXaxis().SetTitleOffset(0.9)
+    npvvnoregions.GetYaxis().SetTitleSize(0.045)
+    npvvnoregions.GetYaxis().SetTitleOffset(0.9)
+    npvvnoregions.Draw("COLZ")
+    canvas.Draw()
+    canvas.SaveAs('controlPlots/npvvnoregions'+str(threshold)+'colz'+str(tt[c])+'.png')
+    print("Hist 2 Done.")
+
+
 
 # Save ROOT File
     """matchDatatools = ROOT.TFile("controlPlots/tools3"+str(tt[c])+".root", "RECREATE")

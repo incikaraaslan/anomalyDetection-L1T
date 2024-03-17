@@ -11,10 +11,10 @@ import pandas as pd
 from evalNN import eval_metric
 
 # Import Model
-model = tf.keras.models.load_model('PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN')
+model = tf.keras.models.load_model('PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN')
 
 # Import Data
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsub100_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubnewJetEt_dataset.h5'
 f = h5py.File(directory, 'r')
 x_test = f['PhiRingEttestshuf'][:]
 x_train = f['PhiRingEttrainshuf'][:]
@@ -32,7 +32,7 @@ y_trainpred = model.predict(x_train)
 y_testpred = model.predict(x_test)
 
 # Draw Histograms
-"""# Histogram of the Predicted and True Distribution of pT
+# Histogram of the Predicted and True Distribution of pT
 value_range = (-20,30)
 
 # Training
@@ -44,7 +44,7 @@ plt.xlabel('Values')
 plt.ylabel('Frequency')
 plt.legend()
 # Save the plot
-plt.savefig('PUPPITrigvSNAILTrigTraining'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')
+plt.savefig('PUPPITrigvSNAILTrigTraining'+'PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN'+'.png')
 
 # Test
 plt.figure(figsize=(10, 5))
@@ -53,10 +53,10 @@ plt.hist(y_testpred.flatten(), bins=50, range=value_range, color='red', alpha=0.
 plt.title('Histogram of Matched TRIG Jet pT v. SNAIL Jet pT Values')
 plt.xlabel('Values')
 plt.ylabel('Frequency')
-plt.ylim(0, 1.04e6)
+# plt.ylim(0, 1.04e6)
 plt.legend()
 # Save the plot
-plt.savefig('PUPPITrigvSNAILTrigTest'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')
+plt.savefig('PUPPITrigvSNAILTrigTest'+'PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN'+'.png')
 
 # Average Error plot between pT values
 trainerrors = np.abs(y_trainpred - y_train)
@@ -75,5 +75,5 @@ plt.ylabel('Frequency')
 plt.legend()
 
 # Save the plot
-plt.savefig('ErrorPUPPITrigvSNAILTrig'+'PhiRingSub-2l-u32-bs128-ks7-s1-flatten_NN'+'.png')"""
+plt.savefig('ErrorPUPPITrigvSNAILTrig'+'PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN'+'.png')
 

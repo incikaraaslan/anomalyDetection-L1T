@@ -73,7 +73,7 @@ for c in tqdm(range(len(tt))):
 
     # Get the first n files from training and test
     with open('output/'+tt[c]+'.txt', 'r') as f:
-        head = [next(f) for k in range(2)]
+        head = [next(f) for k in range(10)]
 
     for x in tqdm(head):
         x = x[:-1]
@@ -128,7 +128,8 @@ for c in tqdm(range(len(tt))):
                 # uncalibrated no-PU-subtracted jet Et= (jetRawEt) x 0.5
                 # calibrated no-PU-subtracted jet Et = jetRawEt x SF x 0.5
                 # (jetRawEt - jetPUEt)*0.5*(8/7)
-                jetEt = (chains['trigJet'].jetRawEt[j]-chains['trigJet'].jetPUEt[j]) * 0.5 * 8/7
+                jetEt = chains['trigJet'].jetRawEt[j] *0.5
+                # jetEt = (chains['trigJet'].jetRawEt[j]-chains['trigJet'].jetPUEt[j]) * 0.5 * 8/7
                 trigJet.SetPtEtaPhi(jetEt, chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j]) # chains['trigJet'].jetEt[j]
                 trigJetptarr.append(trigJet)
 
@@ -155,7 +156,7 @@ for c in tqdm(range(len(tt))):
         for j in range(len(tet_fortrigmatched[i])):
             y.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
             print(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
-    print(len(y), len(x)) #7064 8153 multiple ET regions for a PUPPI jet value --> 
+    print(len(y), len(x))
     hdf5_file.create_dataset('PhiRingEt'+tt[c], data=x)
     hdf5_file.create_dataset('PuppiTrigEtDiff'+tt[c], data=y)
     f.close()
