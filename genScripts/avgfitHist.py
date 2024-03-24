@@ -20,7 +20,7 @@ b = 'AnomalyNPileup'
 
 # Running the histograms
 run = input("Which Run?") # 'B' whenever I have that for pileup lol
-canvas = ROOT.TCanvas('canvas', '', 500, 500)
+canvas = ROOT.TCanvas('canvas', '', 900, 700)
  
 flist = o+a+run+'.root'
 openfiles = []
@@ -31,8 +31,8 @@ openfiles.append(f)
     
 hist = f.Get(b+run)
 hist.SetTitle("")
-hist.GetXaxis().SetTitle("Anomaly Score")
-hist.GetYaxis().SetTitle("True Pileup")
+hist.GetXaxis().SetTitle("CICADA Anomaly Score")
+hist.GetYaxis().SetTitle("Number of Primary Vertices (npv)")
 hist.SetMarkerStyle(8)
 hist.SetMarkerSize(0.4)
 hist.GetXaxis().SetTitleSize(0.035)
@@ -43,13 +43,23 @@ hist.Draw("COLZ")
     
 avgforEachP = f.Get("INCImaxforEachP_run"+run)
 # TF1 *f = new TF1("f", "[2] * x * x + [1] * x + [0]"); g->Fit(f); g->Draw("AL");
-f = ROOT.TF1("f", "[1] * (x ** (0.5)) + [0]")
+# f = ROOT.TF1("f", "[1] * (x ** (0.5)) + [0]")
+f = ROOT.TF1("f", "[1] * (x) + [0]")
+# f = avgforEachP.Fit("pol1")
 avgforEachP.Fit(f)
-# avgforEachP.Fit("pol1")
 avgforEachP.Draw("SAME")
 
+leg = ROOT.TLegend(0.63, 0.80, 0.90, 0.90) # 0.72, 0.68, 0.89, 0.80
+leg.SetBorderSize(1)
+leg.SetFillColor(10)
+leg.SetFillStyle(2)
+leg.SetTextFont(40)
+leg.AddEntry(f, "Linear Fit", "l")
+leg.AddEntry(avgforEachP, "Average for Each Bin", "l")
+
+leg.Draw()
 canvas.Draw()
-canvas.SaveAs('INCIfittedpol12'+a+run+'.png')
+canvas.SaveAs('FittedPol1'+a+run+'.png')
 """
 OLD DATA
 

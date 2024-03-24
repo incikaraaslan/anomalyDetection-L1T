@@ -92,6 +92,6 @@ eval_metric(model, trainHistory)
 plt.savefig("learningCurvephiSub-1l-u32-bs128-ks7-s1-flatten.png")
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-tf.keras.utils.plot_model(model, to_file="phiSub-2l-u32-bs128-ks7-s1-flatten.png", show_shapes=True)
+tf.keras.utils.plot_model(model, to_file="phiSub-1l-u32-bs128-ks7-s1-flatten.png", show_shapes=True)
 model.save("PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN")
 print("Done!")

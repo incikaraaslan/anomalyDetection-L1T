@@ -7,7 +7,7 @@ import math
 import matplotlib.pyplot as plt
 from array import array
 
-# ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetOptStat(0)
 
 # Multiple Files
 run_list = []
@@ -36,8 +36,8 @@ for i in range(len(run_list)):
 
 
 # Canvas and Formatting
-canvas = ROOT.TCanvas('C', 'Canvas', 500, 500)
-hcalnpv = ROOT.TH2F("nHCALtpvnpv", "nHCALtp v. npv", 100, 0.0, 80, 100, 0.0, 1200)
+canvas = ROOT.TCanvas('C', 'Canvas', 900, 750)
+hcalnpv = ROOT.TH2F("nHCALtpvnpv", "nHCALtp v. npv", 100, 0.0, 80, 100, 0.0, 2000)
 totalhcaletnpv = ROOT.TH2F("totalhcalEtvnpv", "totalhcaltpEt v. npv", 100, 0.0, 80, 100, 0.0, 1500)
 totalhecaletnpv = ROOT.TH2F("totalhcalecalEtvnpv", "total hcal+ecal tpEt v. npv", 100, 0.0, 80, 100, 0.0, 1700)
 # phiringetnpv = ROOT.TH1F("PUPPI P_T", "P_T (GeV)", 100, 0.0, 170.0)
@@ -48,7 +48,7 @@ for i in tqdm(range(chains['PUChainPUPPI'].GetEntries())):
     chains['PUChainPUPPI'].GetEntry(i)
     chains['caloTower'].GetEntry(i)
 
-    hcalnpv.Fill(chains['PUChainPUPPI'].npv, chains['caloTower'].CaloTP.nHCALTP)
+    hcalnpv.Fill(chains['PUChainPUPPI'].npv, chains['caloTower'].CaloTP.nHCALTP + chains['caloTower'].CaloTP.nECALTP)
     for j in range(chains['caloTower'].CaloTP.hcalTPet.size()):
         hcaltpet += chains['caloTower'].CaloTP.hcalTPet[j]
 
@@ -67,16 +67,16 @@ hcalnpv.SetLineColor(46)
 hcalnpv.SetMarkerColor(46)
 hcalnpv.SetMarkerStyle(8)
 hcalnpv.SetMarkerSize(0.5)
-hcalnpv.SetTitle("nHCALtp v. npv")
+hcalnpv.SetTitle("nHCALtp + nECALtp v. npv")
 hcalnpv.GetXaxis().SetTitle("npv")
-hcalnpv.GetYaxis().SetTitle("nHCALTP")
+hcalnpv.GetYaxis().SetTitle("nHCALTP + nECALtp")
 hcalnpv.GetXaxis().SetTitleSize(0.045)
-hcalnpv.GetXaxis().SetTitleOffset(0.9)
+hcalnpv.GetXaxis().SetTitleOffset(1.0)
 hcalnpv.GetYaxis().SetTitleSize(0.045)
-hcalnpv.GetYaxis().SetTitleOffset(0.9)
+hcalnpv.GetYaxis().SetTitleOffset(1.2)
 hcalnpv.Draw("COLZ")
 canvas.Draw()
-canvas.SaveAs('controlPlots/nHCALtpvnpv.png')
+canvas.SaveAs('controlPlots/nHCALECALtpvnpv.png')
 print("Hist 1 Done.")
 
 canvas.Clear()
@@ -91,9 +91,9 @@ totalhcaletnpv.SetTitle("Total HCALTp E_t v. npv")
 totalhcaletnpv.GetXaxis().SetTitle("npv")
 totalhcaletnpv.GetYaxis().SetTitle("Total HCALTp")
 totalhcaletnpv.GetXaxis().SetTitleSize(0.045)
-totalhcaletnpv.GetXaxis().SetTitleOffset(0.9)
+totalhcaletnpv.GetXaxis().SetTitleOffset(1.0)
 totalhcaletnpv.GetYaxis().SetTitleSize(0.045)
-totalhcaletnpv.GetYaxis().SetTitleOffset(0.9)
+totalhcaletnpv.GetYaxis().SetTitleOffset(1.2)
 totalhcaletnpv.Draw("COLZ")
 canvas.Draw()
 canvas.SaveAs('controlPlots/totalhcaltpet.png')
@@ -110,9 +110,9 @@ totalhecaletnpv.SetTitle("Total ECAL + HCALTp E_t v. npv")
 totalhecaletnpv.GetXaxis().SetTitle("npv")
 totalhecaletnpv.GetYaxis().SetTitle("Total ECAL + HCALTp")
 totalhecaletnpv.GetXaxis().SetTitleSize(0.045)
-totalhecaletnpv.GetXaxis().SetTitleOffset(0.9)
+totalhecaletnpv.GetXaxis().SetTitleOffset(1.0)
 totalhecaletnpv.GetYaxis().SetTitleSize(0.045)
-totalhecaletnpv.GetYaxis().SetTitleOffset(0.9)
+totalhecaletnpv.GetYaxis().SetTitleOffset(1.2)
 totalhecaletnpv.Draw("COLZ")
 canvas.Draw()
 canvas.SaveAs('controlPlots/totalhecaltpet.png')
