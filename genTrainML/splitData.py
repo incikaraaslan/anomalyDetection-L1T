@@ -10,7 +10,7 @@ from time import perf_counter
 # import splitfolders
 
 ROOT.gStyle.SetOptStat(0)
-
+# /public/forInci/
 file_list = []
 m_dir = ["/hdfs/store/user/aloelige/EphemeralZeroBias0/SNAIL_2023RunD_EZB0_18Oct2023/231018_205626/",
 "/hdfs/store/user/aloelige/EphemeralZeroBias2/SNAIL_2023RunD_EZB2_19Oct2023/231019_080917/", 

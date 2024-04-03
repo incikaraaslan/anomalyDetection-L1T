@@ -24,6 +24,9 @@ def eval_metric(model, history):
     print("Done!")
     plt.plot(history.history['val_loss'], label='Validation')
     print("Done!")
+    # Print the loss values at each epoch
+    for epoch, loss in enumerate(history.history['loss'], 1):
+        print(f'Epoch {epoch}: Loss = {loss:.4f}')
     plt.ylabel('Loss')
     plt.xlabel('Epoch')
     plt.title('Model Loss')
