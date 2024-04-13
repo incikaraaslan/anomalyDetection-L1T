@@ -11,10 +11,10 @@ import pandas as pd
 from evalNN import eval_metric
 
 # Import Model
-model = tf.keras.models.load_model('PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN')
+model = tf.keras.models.load_model('tot-1l-u32-bs128-ks7-s1-flatten_NN')
 
 # Import Data
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubnewJetEt_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/delputrvtotalntotalet_dataset10000000.h5'
 f = h5py.File(directory, 'r')
 x_test = f['PhiRingEttestshuf'][:]
 x_train = f['PhiRingEttrainshuf'][:]
@@ -59,8 +59,8 @@ plt.legend()
 plt.savefig('PUPPITrigvSNAILTrigTest'+'PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN'+'.png')
 
 # Average Error plot between pT values
-trainerrors = np.abs(y_trainpred - y_train)
-testerrors = np.abs(y_testpred - y_test)
+trainerrors = y_trainpred - y_train
+testerrors = y_testpred - y_test
 trainaverage_error = np.mean(trainerrors)
 testaverage_error = np.mean(testerrors)
 value_range = (-40,40)

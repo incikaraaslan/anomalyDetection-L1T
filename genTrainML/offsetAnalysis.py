@@ -1,14 +1,16 @@
-# Make an improved NTuple format for SNAIL
 import ROOT
 from time import perf_counter
-import numpy as np
-import awkward as ak
 import os
 import math
 import statistics
 import random
 import argparse
+from tqdm import tqdm
+from sklearn import linear_model
+import numpy as np
+import matplotlib.pyplot as plt
 import h5py
+
 from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
@@ -87,19 +89,6 @@ class eventData():
         self.totalTPEnergy = 0.0
         self.totalTPEnergy += sum(self.chain.CaloTP.ecalTPet)
         self.totalTPEnergy += sum(self.chain.CaloTP.hcalTPet)
-        
-        for phi in range(18):
-            for eta in range(14):
-                if self.chain.regionEt[eta + phi * 14] != 0:
-                    self.nCICADAregions += 1
-                    self.totalCICADAet += self.chain.regionEt[eta + phi * 14]
-
-        
-        # self.nCICADAregions += self.chain.modelInput
-        #for i in range(self.nECALTP):
-        #    self.totalTPEnergy += self.chain.CaloTP.ecalTPet[i]
-        #for i in range(self.nHCALTP):
-        #    self.totalTPEnergy += self.chain.CaloTP.hcalTPet[i]
 
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
@@ -127,8 +116,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-
-hdf5_file_name = 'delputrvtotalntotalet_dataset.h5'
+hdf5_file_name = 'offset_dataset100000.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -170,7 +158,7 @@ def makeAverageHistograms(energyDeltaHist, nMatchedPairsHist, nameTitle):
     return averageHist
 
 def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
-    outputTable = Table(title="Average(Puppi ET - Trigger ET)")
+    outputTable = Table(title="Average(Pupppi ET - Trigger ET)")
     outputTable.add_column(columnName, justify="center")
     outputTable.add_column("Energy Delta", justify="center")
 
@@ -182,20 +170,8 @@ def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
 
     console.print(outputTable)
 
-def cut_data_into_bins(data, num_bins, bin_range):
-    # Define the bin edges based on the user-defined range and number of bins
-    bin_edges = np.linspace(bin_range[0], bin_range[1], num_bins + 1)
-
-    # Use numpy's digitize function to assign each data point to a bin
-    bin_indices = np.digitize(data, bin_edges, right=True)
-    
-    # Create a dictionary to store the data points in each bin
-    bins = {}
-    for i in range(1, num_bins + 1):
-        bins[i] = data[bin_indices == i]
-    
-    return bins
-
+# Match PUPPI and TRIG jets --> Draw Histogram vs. # HCAL+ECAL tps --> LinReg get fit + get x, y values 
+# --> get the offset of these two --> create dataset or lookup table with bins vs. offset
 def main(args):
     filePaths = [
         "/hdfs/store/user/aloelige/EphemeralZeroBias0/SNAIL_2023RunD_EZB0_18Oct2023/231018_205626/",
@@ -221,25 +197,21 @@ def main(args):
     triggerJetChain = ROOT.TChain('l1UpgradeEmuTree/L1UpgradeTree')
     regionChain = ROOT.TChain('L1RegionNtuplizer/L1EmuRegions')
     towerChain = ROOT.TChain('l1CaloTowerTree/L1CaloTowerTree')
-    cicadaChain = ROOT.TChain('CICADAv1ntuplizer/L1TCaloSummaryOutput')
-
-
     for fileName in track(allFiles, description="Adding files..."):
         eventChain.Add(fileName)
         puppiJetChain.Add(fileName)
         triggerJetChain.Add(fileName)
         regionChain.Add(fileName)
         towerChain.Add(fileName)
-        # cicadaChain.Add(fileName)
     eventChain.AddFriend(puppiJetChain)
     eventChain.AddFriend(triggerJetChain)
     eventChain.AddFriend(regionChain)
     eventChain.AddFriend(towerChain)
-    # eventChain.AddFriend(cicadaChain)
 
     # df = ROOT.RDataFrame(eventChain)
 
     # console.print(f'Available columns: \n{df.GetColumnNames()}')
+    
 
     numEvents = eventChain.GetEntries()
     if args.maxEvents is not None:
@@ -247,96 +219,138 @@ def main(args):
     console.print(f'Processing {numEvents} events...', style='underline')
 
     #histogram counting number of jets per nECAL/nHCAL TPs
-    nBins = 10
-    TPs_range = (0.0, 2000.0)
+    nBins = 100
+    minTPs = 0.0
+    maxTPs = 2000.0
 
     minTPEnergy = 0.0
     maxTPEnergy = 4000.0
 
-    eD = []
-    nM = []
-    tTP= []
-    tTPET = []
-    tnCICADA = []
-    tCICADAet = []
+    nMatchedPairsHist = ROOT.TH1D(
+        "nMatchedPairsHist",
+        "nMatchedPairsHist",
+        nBins,
+        minTPs,
+        maxTPs
+    )
+    #histogram weighted by the energy delta
+    energyDeltasHist = ROOT.TH1D(
+        "energyDeltasHist",
+        "energyDeltasHist",
+        nBins,
+        minTPs,
+        maxTPs
+    )
 
-    for i in track(range(1), description="Scrolling events"): #numEvents
+    nMatchedPairs_TPET_Hist = ROOT.TH1D(
+        "nMatchedPairs_TPET_Hist",
+        "nMatchedPairs_TPET_Hist",
+        nBins,
+        minTPEnergy,
+        maxTPEnergy,
+    )
+    energyDeltas_TPET_Hist = ROOT.TH1D(
+        "energyDeltas_TPET_Hist",
+        "energyDeltas_TPET_Hist",
+        nBins,
+        minTPEnergy,
+        maxTPEnergy,
+    )
+
+    for i in track(range(100000), description="Scrolling events"): #numEvents
+    #for i in track(range(100), description="scrolling events"):
         # Grab the event
         eventChain.GetEntry(i)
 
         event = eventData(eventChain)
-        
+
         if event.matchedJets == []: #if we have no matched jets, we're done here
             continue
 
-        # How many matched jets we have
+        #let's figure out how many matched jets we have and the number of TPs
         nMatchedJets = len(event.matchedJets)
-        nM.append(nMatchedJets)
-
-        # The number of TPs
         totalTPs = event.totalTP
-        tTP.append(totalTPs)
 
-        # TP E_Ts
-        totalTPEnergy = event.totalTPEnergy
-        tTPET.append(totalTPEnergy)
+        #fill the histogram with the number of jets we got for this number of TPs
+        nMatchedPairsHist.Fill(totalTPs, nMatchedJets)
 
-        # Del(PUPPI,TRIG)
+        #let's find the differences between matched jets in the event data
         energyDeltas = event.findMatchedJetEnergyDifferences()
+        #let's find the total energy delta
         energyDelta = sum(energyDeltas)
-        eD.append(energyDelta)
+        
+        #now let's fill the histogram
+        energyDeltasHist.Fill(totalTPs, energyDelta)
 
-        # nCICADAentries
-        nCICADA = event.nCICADAregions
-        tnCICADA.append(nCICADA)
-
-        # CICADA ET
-        CICADAets = event.totalCICADAet
-        tCICADAet.append(CICADAets)
-
-
-    eD = np.asarray(eD)
-    nM = np.asarray(nM)
-    tTP = np.asarray(tTP)
-    tTPET = np.asarray(tTPET)
-    tnCICADA = np.asarray(tnCICADA)
-    tCICADAet = np.asarray(tCICADAet)
-
-    #Avg(Del(PUPPI, TRIG)) = y:
-    y = eD/nM
-    x1 = tTP
-    x2 = tTPET
-    x3 = tnCICADA
-    x4 = tCICADAet
+        totalTPEnergy = event.totalTPEnergy
+        nMatchedPairs_TPET_Hist.Fill(totalTPEnergy, nMatchedJets)
+        energyDeltas_TPET_Hist.Fill(totalTPEnergy, energyDelta)
     
+    #then to get average, you divide the bins of the energy deltas hist
+    #by the bin contents of the number of matched jets hists
+    averageJetEnergyDelta = makeAverageHistograms(energyDeltasHist, nMatchedPairsHist, "AverageJetEnergyDelta")
+    averageJetEnergyDelta_TPET = makeAverageHistograms(energyDeltas_TPET_Hist, nMatchedPairs_TPET_Hist, "AverageJetEnergyDelta_TPET")
+
+    y = []
+    y2 = []
+    x = []
+    x2 = []
+    for bin_num in range(1, nBins + 1):
+        bin_center = averageJetEnergyDelta.GetBinCenter(bin_num)
+        bin_centeret = averageJetEnergyDelta_TPET.GetBinCenter(bin_num)
+        bin_content = averageJetEnergyDelta.GetBinContent(bin_num)
+        bin_contentet = averageJetEnergyDelta_TPET.GetBinContent(bin_num)
+        x.append(bin_center)
+        x2.append(bin_centeret)
+        y.append(bin_content)
+        y2.append(bin_contentet)
+    
+    # Model Variables
+    x = np.asarray(x).reshape(-1, 1)
+    x2 = np.asarray(x).reshape(-1, 1)
+    y = np.asarray(y)
+    y2 = np.asarray(y2)
+
+    # M1
+    reg = linear_model.LinearRegression()
+    reg.fit(x, y)
+    y_pred = reg.predict(x)
+    offset = y_pred - y
+
+    # M2
+    reg2 = linear_model.LinearRegression()
+    reg2.fit(x2, y2)
+    y_pred2 = reg.predict(x2)
+    offset2 = y_pred2 - y2
+
     # Write File
-    hdf5_file.create_dataset('totalTPno', data=np.asarray(x1))
-    hdf5_file.create_dataset('totalTPET', data=np.asarray(x2))
-    hdf5_file.create_dataset('totalCICADAno', data=np.asarray(x3))
-    hdf5_file.create_dataset('totalCICADAET', data=np.asarray(x4))
-    hdf5_file.create_dataset('avgpuppitrigEt', data=np.asarray(y))
+    hdf5_file.create_dataset('TPno', data=np.asarray(x))
+    hdf5_file.create_dataset('TPet', data=np.asarray(x2))
+    hdf5_file.create_dataset('AvgDelOffsettp', data=np.asarray(y))
+    hdf5_file.create_dataset('AvgDelOffsettpet', data=np.asarray(y2))
 
     hdf5_file.close()
-    
-    print("File Created.")
 
-    """delputrigbin = cut_data_into_bins(eD, nBins, TPs_range)
-    nMatchedbin = cut_data_into_bins(nM, nBins, TPs_range)
-    # Perform bin-by-bin division
-    avgdelputrig = {}
-    for i in range(1, nBins + 1):
-        avgdelputrig[i] = np.divide(delputrigbin[i], nMatchedbin[i], out=np.zeros_like(delputrigbin[i]), where=nMatchedbin[i] != 0).astype(float)
+    # Plot
+    """plt.scatter(x2, y2, color='blue', label='Original Data')
+    plt.plot(x2, y_pred2, color='red', label='Linear Fit')
+    plt.xlabel('HCAL + ECAL TPET')
+    plt.ylabel(f'Average $\Delta(PUPPI P_T, TRIG P_T)$')
+    plt.title('Linear Regression Fit')
+    plt.legend()
+    plt.savefig('linear_regression_plot.png')
+    plt.show()"""
+    
+
         
-    # Print the resulting bins after division
-    for bin_num, bin_data in avgdelputrig.items():
-        print(f'Bin {bin_num}: {bin_data}')"""
+    # print(x,y)
 
 
     """makeDebugTable(averageJetEnergyDelta, minTPs, maxTPs, nBins, "nTPs")
 
-    makeDebugTable(averageJetEnergyDelta_TPET, minTPEnergy, maxTPEnergy, nBins, "Total TP Energy") """       
+    makeDebugTable(averageJetEnergyDelta_TPET, minTPEnergy, maxTPEnergy, nBins, "Total TP Energy")        
 
-    """outputFile = ROOT.TFile(args.outputFileName, "RECREATE")
+    outputFile = ROOT.TFile(args.outputFileName, "RECREATE")
     nMatchedPairsHist.Write()
     energyDeltasHist.Write()
     averageJetEnergyDelta.Write()

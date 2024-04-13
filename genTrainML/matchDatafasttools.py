@@ -121,6 +121,10 @@ for c in tqdm(range(len(tt))):
             chains['regionEt'].GetEntry(i)
             chains['PUChainPUPPI'].GetEntry(i)
             chains['caloTower'].GetEntry(i)
+            chains['cicadaChain'].GetEntry(i)
+
+            CICADAinputs = chains['cicadaChain'].modelInput
+            print("CICADAinputs: " + str(len(CICADAinputs)), CICADAinputs)
             
             # Singular Calculation
             npv = chains['PUChainPUPPI'].npv
@@ -237,7 +241,7 @@ for c in tqdm(range(len(tt))):
             
     # Draw Histograms
 # nHCALTP + nECALTP v. Avg(Del(PUPPI - TRIG)) P_T
-    delputrig = []
+    """delputrig = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
@@ -312,8 +316,8 @@ for c in tqdm(range(len(tt))):
     hcalecaldelputrig.GetXaxis().SetTitle("nHCALTP + nECALTP")
     
     hcalecaldelputrig.GetXaxis().SetRangeUser(1100, 1400)
-    """hcalecaldelputrig.Fit("pol1")
-    hcalecaldelputrig.GetFunction("pol1").SetLineColor(1)"""
+    hcalecaldelputrig.Fit("pol1")
+    hcalecaldelputrig.GetFunction("pol1").SetLineColor(1)
     hcalecaldelputrig.GetXaxis().SetTitleSize(0.045)
     hcalecaldelputrig.GetXaxis().SetTitleOffset(0.9)
     hcalecaldelputrig.GetYaxis().SetTitleSize(0.045)
@@ -331,7 +335,7 @@ for c in tqdm(range(len(tt))):
     canvas.SaveAs('controlPlots/nhcalecalavgdelputrig'+str(tt[c])+'.png')
     print("Hist 0 Done.")
 
-    canvas.Clear()
+    canvas.Clear()"""
     
 # PhiRing Circle E_t v Del(PUPPI - TRIG) P_T
     """summ = []
@@ -545,7 +549,7 @@ for c in tqdm(range(len(tt))):
     print("Hist 2 Done.")"""
 
 # Avg(Del(PUPPI - TRIG) P_T) v. npv
-    npvss =[]
+    """npvss =[]
     for a in range(len(t_npv)):
         for b in range(len(t_npv[a])):
             npvss.append(t_npv[a][b])
@@ -597,8 +601,8 @@ for c in tqdm(range(len(tt))):
     for i in range(len(b)):
         delputrigvnpv.Fill(np.asarray(a[i])/np.asarray(f[i]), np.asarray(b[i])/np.asarray(f[i]))
 
-    """delputrigvnpv.Fit("pol1")
-    delputrigvnpv.GetFunction("pol1").SetLineColor(1)"""   
+    delputrigvnpv.Fit("pol1")
+    delputrigvnpv.GetFunction("pol1").SetLineColor(1)
     delputrigvnpv.SetLineColor(46)
     delputrigvnpv.SetMarkerColor(46)
     delputrigvnpv.SetMarkerStyle(8)
@@ -614,10 +618,10 @@ for c in tqdm(range(len(tt))):
     canvas.Draw()
     canvas.SaveAs('controlPlots/avgdelputrigvnpv'+str(tt[c])+'.png')
     print("Hist 1 Done.")
-    canvas.Clear()
+    canvas.Clear()"""
 
 # Del(PUPPI - TRIG) P_T v. Number of RegionEt Above Threshold
-    delputrig = []
+    """delputrig = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             delputrig.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
@@ -669,8 +673,8 @@ for c in tqdm(range(len(tt))):
     for i in range(len(b)):
         delputrigvnoregions.Fill(np.asarray(a[i])/np.asarray(f[i]), np.asarray(b[i])/np.asarray(f[i]))
     
-    """delputrigvnoregions.Fit("pol1")
-    delputrigvnoregions.GetFunction("pol1").SetLineColor(1)""" 
+    delputrigvnoregions.Fit("pol1")
+    delputrigvnoregions.GetFunction("pol1").SetLineColor(1)
     delputrigvnoregions.SetLineColor(46)
     delputrigvnoregions.SetMarkerColor(46)
     delputrigvnoregions.SetMarkerStyle(8)
@@ -687,7 +691,7 @@ for c in tqdm(range(len(tt))):
     canvas.SaveAs('controlPlots/avgdelputrigvnoregions'+str(threshold)+str(tt[c])+'.png')
     print("Hist 2 Done.")
 
-    canvas.Clear()
+    canvas.Clear()"""
 
 # npv v. Number of RegionEt Above Threshold
     """npvss =[]
