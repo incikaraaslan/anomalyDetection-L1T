@@ -725,8 +725,6 @@ for c in tqdm(range(len(tt))):
     canvas.SaveAs('controlPlots/2npvvnoregions'+str(threshold)+'colz'+str(tt[c])+'.png')
     print("Hist 2 Done.")"""
 
-
-
 # Save ROOT File
     """matchDatatools = ROOT.TFile("controlPlots/tools3"+str(tt[c])+".root", "RECREATE")
     matchDatatools.WriteObject(phiringetdelputrig, "phiringetdelputrig"+str(tt[c]))

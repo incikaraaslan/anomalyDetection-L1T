@@ -116,7 +116,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'offset_dataset100000.h5'
+hdf5_file_name = 'offset_datasetf.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -290,16 +290,24 @@ def main(args):
     #by the bin contents of the number of matched jets hists
     averageJetEnergyDelta = makeAverageHistograms(energyDeltasHist, nMatchedPairsHist, "AverageJetEnergyDelta")
     averageJetEnergyDelta_TPET = makeAverageHistograms(energyDeltas_TPET_Hist, nMatchedPairs_TPET_Hist, "AverageJetEnergyDelta_TPET")
-
+    # loop over bins get the bin error, gen bin error of eD/ get bin content of nMatched
+    # ind errs on eD histogram, store it as a hdf5 dataset
     y = []
     y2 = []
     x = []
     x2 = []
+    yerr = []
+    y2err = []
     for bin_num in range(1, nBins + 1):
         bin_center = averageJetEnergyDelta.GetBinCenter(bin_num)
-        bin_centeret = averageJetEnergyDelta_TPET.GetBinCenter(bin_num)
         bin_content = averageJetEnergyDelta.GetBinContent(bin_num)
+        bin_centeret = averageJetEnergyDelta_TPET.GetBinCenter(bin_num)
         bin_contentet = averageJetEnergyDelta_TPET.GetBinContent(bin_num)
+        binerror = energyDeltasHist.GetBinError(bin_num) / nMatchedPairsHist.GetBinContent(bin_num)
+        binerror2 = energyDeltas_TPET_Hist.GetBinError(bin_num) / nMatchedPairs_TPET_Hist.GetBinContent(bin_num)
+        
+        yerr.append(binerror)
+        y2err.append(binerror2)
         x.append(bin_center)
         x2.append(bin_centeret)
         y.append(bin_content)
@@ -311,24 +319,14 @@ def main(args):
     y = np.asarray(y)
     y2 = np.asarray(y2)
 
-    # M1
-    reg = linear_model.LinearRegression()
-    reg.fit(x, y)
-    y_pred = reg.predict(x)
-    offset = y_pred - y
-
-    # M2
-    reg2 = linear_model.LinearRegression()
-    reg2.fit(x2, y2)
-    y_pred2 = reg.predict(x2)
-    offset2 = y_pred2 - y2
 
     # Write File
     hdf5_file.create_dataset('TPno', data=np.asarray(x))
     hdf5_file.create_dataset('TPet', data=np.asarray(x2))
     hdf5_file.create_dataset('AvgDelOffsettp', data=np.asarray(y))
     hdf5_file.create_dataset('AvgDelOffsettpet', data=np.asarray(y2))
-
+    hdf5_file.create_dataset('AvgDelOffsettperr', data=np.asarray(yerr))
+    hdf5_file.create_dataset('AvgDelOffsettpeterr', data=np.asarray(y2err))
     hdf5_file.close()
 
     # Plot

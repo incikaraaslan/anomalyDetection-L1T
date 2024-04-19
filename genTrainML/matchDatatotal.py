@@ -87,7 +87,9 @@ class eventData():
         self.totalTPEnergy = 0.0
         self.totalTPEnergy += sum(self.chain.CaloTP.ecalTPet)
         self.totalTPEnergy += sum(self.chain.CaloTP.hcalTPet)
-        
+        self.nCICADAregions = 0
+        self.totalCICADAet = 0
+
         for phi in range(18):
             for eta in range(14):
                 if self.chain.regionEt[eta + phi * 14] != 0:
@@ -128,7 +130,7 @@ def createTriggerAndPuppiJets(theChain):
 
 # Write on a File
 
-hdf5_file_name = 'delputrvtotalntotalet_dataset.h5'
+hdf5_file_name = 'delputrvtotalntotaletwcicada_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -259,8 +261,9 @@ def main(args):
     tTPET = []
     tnCICADA = []
     tCICADAet = []
+    lorentzVectors = []
 
-    for i in track(range(1), description="Scrolling events"): #numEvents
+    for i in track(range(1000), description="Scrolling events"): #numEvents
         # Grab the event
         eventChain.GetEntry(i)
 
@@ -286,6 +289,11 @@ def main(args):
         energyDelta = sum(energyDeltas)
         eD.append(energyDelta)
 
+        ## Above a certain threshold:
+        if energyDelta >= 10:
+            for trigJet, puppiJet in event.matchedJets:
+                lorentzVectors.append([trigJet.lorentzVector.Et(), trigJet.lorentzVector.Eta(), trigJet.lorentzVector.Phi()])
+
         # nCICADAentries
         nCICADA = event.nCICADAregions
         tnCICADA.append(nCICADA)
@@ -301,6 +309,9 @@ def main(args):
     tTPET = np.asarray(tTPET)
     tnCICADA = np.asarray(tnCICADA)
     tCICADAet = np.asarray(tCICADAet)
+
+    print(lorentzVectors)
+
 
     #Avg(Del(PUPPI, TRIG)) = y:
     y = eD/nM

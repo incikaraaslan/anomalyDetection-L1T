@@ -57,12 +57,12 @@ plt.show()
 plt.savefig("learningCurvetot-2f-1l-u2-bs32wrelu.png")
 
 # Results
-with open('./output/NNtrialoutputs.txt', 'a') as file:
+"""with open('./output/NNtrialoutputs.txt', 'a') as file:
     file.write("Batch Norm - Dense(2) - Dense(1) Fit with Two Features [nTP, TPET] with ReLU:\n")
     file.write("Mean:" + str(np.mean(y_test))+ " , Predicted Mean: " + str(np.mean(p)) + '\n')
     file.write("Median:" + str(np.median(y_test))+ " , Predicted Median: " + str(np.median(p)) + '\n')
     file.write("Total Prediction MSE: " + str(mean_squared_error(p, y_test)) + '\n')
-    file.write("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(p, y_test))) + '\n')
+    file.write("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(p, y_test))) + '\n')"""
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
 tf.keras.utils.plot_model(model, to_file="tot-2f-1l-u2-bs32wrelu.png", show_shapes=True)
