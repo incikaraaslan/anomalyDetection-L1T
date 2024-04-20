@@ -22,85 +22,68 @@ f = h5py.File(directory, 'r')
 
 y_actual = f['AvgDelOffsettp'][:]
 x = f['TPno'][:]
+y_actualerr = f['AvgDelOffsettperr'][:]
 non_zero_index_axis = np.argmax(y_actual != 0, axis=0)
 x = x[non_zero_index_axis:]
 y_actual = y_actual[non_zero_index_axis:]
+y_actualerr = y_actualerr[non_zero_index_axis:]
 
-print(x, y_actual)
 # Create ROOT Histogram
 canvas = ROOT.TCanvas("canvas", "offsetfit", 800, 600)
-leg = ROOT.TLegend(0.8, 0.8, 0.9, 0.9)
+leg = ROOT.TLegend(0.75, 0.8, 0.9, 0.9)
 lingraph = ROOT.TGraphErrors(len(x))
 linfit = ROOT.TGraphErrors(100)
-"""histdat = ROOT.TH2D("datnlinregtpno", "Average (PUPPI PT - TRIG PT) v. Number of HCAL+ECAL TPs", 20, 0, 2000, 20, -15, 15)
-histfit = ROOT.TH2D("fitnlinregtpno", "Average (PUPPI PT - TRIG PT) v. Number of HCAL+ECAL TPs", 20, 0, 2000, 20, -15, 15)"""
 
 # Create a linear regression model to predict y-values
 model_lr = LinearRegression()
-model_lr.fit(x, y_actual)
+model_lr.fit(x, y_actual, 1/y_actualerr)
 
 # Predict y-values using the linear regression model
 y_predicted = model_lr.predict(x)
-print(model_lr.coef_, model_lr.intercept_, y_predicted)
 
 for i in range(len(x)):
     lingraph.SetPoint(i, x[i], y_actual[i])
+    lingraph.SetPointError(i, 0.0, y_actualerr[i])
 
 for i in range(100):
-    linfit.SetPoint(i, i*20, model_lr.predict([[i*20]]))
+    linfit.SetPoint(i, i*25, model_lr.predict([[i*25]]))
+
 
 lingraph.SetMarkerStyle(20)
 lingraph.SetMarkerColor(ROOT.kRed)
+lingraph.SetMarkerSize(1)
+lingraph.SetMarkerStyle(ROOT.kFullCircle) 
+lingraph.SetTitle("")
+lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs")
+lingraph.GetYaxis().SetTitle("Average Matched PUPPI p_{T}- Trigger Jet p_{T}")
 linfit.SetMarkerColor(ROOT.kBlue)
-linfit.SetLineWidth(4)
+linfit.SetLineWidth(3)
+
+
 lingraph.Draw("AP")
 linfit.Draw("L")
 leg.AddEntry(lingraph, "Data", "P")
 leg.AddEntry(linfit, "Fit", "L")
-leg.SetLineWidth(0)
+leg.SetLineWidth(1)
 leg.SetFillStyle(0)
 leg.Draw()
+
+# Add CMS label after drawing other elements
+cmsLatex = ROOT.TLatex()
+cmsLatex.SetTextSize(0.05)
+cmsLatex.SetNDC(True)
+cmsLatex.SetTextAlign(32)
+cmsLatex.SetTextColor(ROOT.kBlack) 
+cmsLatex.DrawLatex(0.9, 0.92, "#font[61]{CMS} #font[52]{Preliminary}")
 canvas.SaveAs("foo.png")
-# Compute offsets (difference between actual y and predicted y)
-"""offsets = y_predicted
 
-# Feature selection (using x values)
-features = x  # You can choose which features to use for the secondary model
-
-# Split data into training and testing sets for the secondary model
-x_train, x_test, y_train, y_test = train_test_split(features, y_actual, test_size=0.2, random_state=42)
-
-# Standardize features (optional but can improve model performance)
-scaler = StandardScaler()
-x_train_scaled = scaler.fit_transform(x_train)
-x_test_scaled = scaler.transform(x_test)
-
-# Train a secondary model (e.g., another linear regression model) to predict offsets
-secondary_model = LinearRegression()
-secondary_model.fit(x_train_scaled, y_train)
-
-# Make predictions on the test set using the secondary model
-offsets_predicted = secondary_model.predict(x_test_scaled)
-
-# Correct y-values by subtracting the predicted offsets
-# y_corrected = y_test - offsets_predicted
-threshold = 1
-y_corrected = np.where(y_test >= threshold, y_test - offsets_predicted, y_test)
-y_offset = y_test - y_corrected
-x_test = np.concatenate(x_test)
-"""
 # Calculate the Mean Squared Error (MSE) of the corrected y-values
-"""print("Mean:" + str(np.mean(y_test))+ " , Predicted Mean: " + str(np.mean(y_corrected)) + '\n')
-print("Median:" + str(np.median(y_test))+ " , Predicted Median: " + str(np.median(y_corrected)) + '\n')
-print("Total Prediction MSE: " + str(mean_squared_error(y_test, y_corrected)) + '\n')
-print("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(y_test, y_corrected))) + '\n')
+print("Mean:" + str(np.mean(y_actual))+ " , Predicted Mean: " + str(np.mean(y_predicted)) + '\n')
+print("Median:" + str(np.median(y_actual))+ " , Predicted Median: " + str(np.median(y_predicted)) + '\n')
+print("Total Prediction MSE: " + str(mean_squared_error(y_actual, y_predicted)) + '\n')
+print("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(y_actual, y_predicted))) + '\n')
+print("Model Coeff:" + str(model_lr.coef_) + " Intercept:" + str(model_lr.intercept_))
 
-# Plot correction
-for i in range(len(x_test)):
-    histfit.Fill(x_test[i], y_offset[i])
-    histdat.Fill(x_test[i], y_test[i])"""
-
-# Errs
 # Create profile histograms along x and y directions to get error bars
 """profileX = histfit.ProfileX()
 profileY = histfit.ProfileY()

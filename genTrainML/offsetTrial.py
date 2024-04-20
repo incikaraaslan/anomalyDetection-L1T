@@ -93,8 +93,14 @@ class eventData():
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
-            etDeltas.append(puppiJet.lorentzVector.Et()-triggerJet.lorentzVector.Et())
+            etDeltas.append(puppiJet.lorentzVector.Et()-(triggerJet.lorentzVector.Et() + self.correctionpred()))
         return etDeltas
+    
+    def correctionpred(self):
+        coeff = -0.01653386
+        intercept = 17.227005180909135
+        return coeff * self.totalTP + intercept
+
 
 def createTriggerAndPuppiJets(theChain):
     triggerJets = []
@@ -116,7 +122,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'offset_dataset.h5'
+hdf5_file_name = 'offset_trial100000.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):

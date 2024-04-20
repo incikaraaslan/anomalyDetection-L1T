@@ -10,7 +10,7 @@ from sklearn import linear_model
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-
+import tensorflow as tf 
 from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
@@ -93,8 +93,15 @@ class eventData():
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
-            etDeltas.append(puppiJet.lorentzVector.Et()-triggerJet.lorentzVector.Et())
+            etDeltas.append(puppiJet.lorentzVector.Et()-(triggerJet.lorentzVector.Et())) #  + self.correctionpred()
         return etDeltas
+    
+    """def correctionpred(self):
+        model = tf.keras.models.load_model('simplethesis_NN')
+        x = np.column_stack((self.totalTP, self.totalTPEnergy))
+        y = np.asarray(model.predict(x)).astype(float)
+        return y[0][0]"""
+
 
 def createTriggerAndPuppiJets(theChain):
     triggerJets = []
@@ -116,7 +123,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'offset_dataset.h5'
+hdf5_file_name = 'NN_orig.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -158,7 +165,7 @@ def makeAverageHistograms(energyDeltaHist, nMatchedPairsHist, nameTitle):
     return averageHist
 
 def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
-    outputTable = Table(title="Average(Pupppi ET - Trigger ET)")
+    outputTable = Table(title="Average(Puppi ET - Trigger ET)")
     outputTable.add_column(columnName, justify="center")
     outputTable.add_column("Energy Delta", justify="center")
 
@@ -257,7 +264,7 @@ def main(args):
         maxTPEnergy,
     )
 
-    for i in track(range(100000), description="Scrolling events"): #numEvents
+    for i in track(range(1000), description="Scrolling events"): #numEvents
     #for i in track(range(100), description="scrolling events"):
         # Grab the event
         eventChain.GetEntry(i)
@@ -270,6 +277,7 @@ def main(args):
         #let's figure out how many matched jets we have and the number of TPs
         nMatchedJets = len(event.matchedJets)
         totalTPs = event.totalTP
+        totalTPEnergy = event.totalTPEnergy
 
         #fill the histogram with the number of jets we got for this number of TPs
         nMatchedPairsHist.Fill(totalTPs, nMatchedJets)
@@ -282,7 +290,6 @@ def main(args):
         #now let's fill the histogram
         energyDeltasHist.Fill(totalTPs, energyDelta)
 
-        totalTPEnergy = event.totalTPEnergy
         nMatchedPairs_TPET_Hist.Fill(totalTPEnergy, nMatchedJets)
         energyDeltas_TPET_Hist.Fill(totalTPEnergy, energyDelta)
     
