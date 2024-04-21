@@ -58,6 +58,12 @@ leg.AddEntry(f, "Linear Fit", "l")
 leg.AddEntry(avgforEachP, "Average for Each Bin", "l")
 
 leg.Draw()
+cmsLatex = ROOT.TLatex()
+cmsLatex.SetTextSize(0.05)
+cmsLatex.SetNDC(True)
+cmsLatex.SetTextAlign(32)
+cmsLatex.SetTextColor(ROOT.kBlack) 
+cmsLatex.DrawLatex(0.9, 0.92, "#font[61]{CMS} #font[52]{Preliminary}")
 canvas.Draw()
 canvas.SaveAs('FittedPol1'+a+run+'.png')
 """

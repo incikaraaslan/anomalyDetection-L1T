@@ -24,9 +24,13 @@ y_actual = f['AvgDelOffsettp'][:]
 x = f['TPno'][:]
 y_actualerr = f['AvgDelOffsettperr'][:]
 non_zero_index_axis = np.argmax(y_actual != 0, axis=0)
+"""cut_indices = np.where(x < 1250)[0]"""
 x = x[non_zero_index_axis:]
 y_actual = y_actual[non_zero_index_axis:]
 y_actualerr = y_actualerr[non_zero_index_axis:]
+"""x = x[cut_indices]
+y_actual = y_actual[cut_indices]
+y_actualerr = y_actualerr[cut_indices]"""
 
 # Create ROOT Histogram
 canvas = ROOT.TCanvas("canvas", "offsetfit", 800, 600)
@@ -36,6 +40,7 @@ linfit = ROOT.TGraphErrors(100)
 
 # Create a linear regression model to predict y-values
 model_lr = LinearRegression()
+# mod_err = [0 if y_actualerr[i] == 0 else 1/y_actualerr[i] for i in range(len(y_actualerr))]
 model_lr.fit(x, y_actual, 1/y_actualerr)
 
 # Predict y-values using the linear regression model
@@ -54,7 +59,7 @@ lingraph.SetMarkerColor(ROOT.kRed)
 lingraph.SetMarkerSize(1)
 lingraph.SetMarkerStyle(ROOT.kFullCircle) 
 lingraph.SetTitle("")
-lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs")
+lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs") # Number of HCAL+ECAL TPs #Total HCAL E_{T} + ECAL E_{T}
 lingraph.GetYaxis().SetTitle("Average Matched PUPPI p_{T}- Trigger Jet p_{T}")
 linfit.SetMarkerColor(ROOT.kBlue)
 linfit.SetLineWidth(3)
@@ -75,7 +80,7 @@ cmsLatex.SetNDC(True)
 cmsLatex.SetTextAlign(32)
 cmsLatex.SetTextColor(ROOT.kBlack) 
 cmsLatex.DrawLatex(0.9, 0.92, "#font[61]{CMS} #font[52]{Preliminary}")
-canvas.SaveAs("foo.png")
+canvas.SaveAs("fooval.png")
 
 # Calculate the Mean Squared Error (MSE) of the corrected y-values
 print("Mean:" + str(np.mean(y_actual))+ " , Predicted Mean: " + str(np.mean(y_predicted)) + '\n')

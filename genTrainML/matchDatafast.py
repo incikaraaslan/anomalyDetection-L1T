@@ -12,7 +12,7 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsub_dataset.h5'
+hdf5_file_name = 'phiringsubcircleofphi_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
@@ -128,10 +128,10 @@ for c in tqdm(range(len(tt))):
                     trigiPhi = round((chains['trigJet'].jetIPhi[j]-jet_regionIndex)/14)
                     for iPhi in range(18):
                         # Phi-Ring
-                        etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
+                        """etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])"""
                     
                         # Circle around Jet Hit
-                        """if iPhi == trigiPhi:
+                        if iPhi == trigiPhi:
                             # a = np.asarray(chains['regionEt'].regionEt).reshape(14,18)
                             # etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
                             circleofPhi(iPhi, jet_regionIndex)
@@ -139,17 +139,17 @@ for c in tqdm(range(len(tt))):
                             circleofPhi(iPhi, jet_regionIndex - 1)
                             # print(etList)
                         else:
-                            continue"""
+                            continue
                     
                     et_fortrig.append(etList)
                     counters[c+2] += 1
                     # If no specific circle
-                    if etList == []:
+                    """if etList == []:
                         print("Empty:")
                         print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
                     else:
                         et_fortrig.append(etList)
-                        counters[c+2] += 1
+                        counters[c+2] += 1"""
                 else:
                     continue
 
@@ -181,14 +181,14 @@ for c in tqdm(range(len(tt))):
         for b in range(len(tet_fortrigmatched[a])):
             x.append(tet_fortrigmatched[a][b])
     
-    # x = np.array(x, dtype=np.float64)
+    x = np.array(x, dtype=np.float64)
     # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
     y = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             y.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
 
-    # y = np.array(y, dtype=np.float64)
+    y = np.array(y, dtype=np.float64)
 
     print(len(y), len(x))
     print(y, x)

@@ -10,7 +10,7 @@ from sklearn import linear_model
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
-
+import tensorflow as tf 
 from rich.console import Console
 from rich.progress import track
 from rich.traceback import install
@@ -67,6 +67,7 @@ class triggerJet(jet):
         self.seedEt = theChain.L1Upgrade.jetSeedEt[entryNum]
         self.BX = theChain.L1Upgrade.jetBx[entryNum]
         self.HWQuality = theChain.L1Upgrade.jetHwQual[entryNum]
+        self.iEta, self.iPhi = iEtaiPhiMap.iEtaiPhi(self.eta, self.phi)
 
 class noPUTriggerJet(triggerJet):
     def __init__(self, theChain: ROOT.TChain, entryNum: int):
@@ -82,6 +83,8 @@ class noPUTriggerJet(triggerJet):
 class eventData():
     def __init__(self, theChain: ROOT.TChain):
         self.chain = theChain
+        friendNames = self.chain.GetListOfFriends()
+        self.regionChain = theChain.GetFriend('L1RegionNtuplizer/L1EmuRegions')
         self.matchedJets, self.unmatchedTriggerJets, self.unmatchedPuppiJets = createMatchedAndUnmatchedJets(*createTriggerAndPuppiJets(self.chain))
         self.nECALTP = self.chain.CaloTP.nECALTP
         self.nHCALTP = self.chain.CaloTP.nHCALTP
@@ -93,13 +96,24 @@ class eventData():
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
-            etDeltas.append(puppiJet.lorentzVector.Et()-(triggerJet.lorentzVector.Et() + self.correctionpred()))
+            etList = []  # Initialize etList here
+            if 0 <= triggerJet.iEta <= 13:
+                # trigiPhi = round((triggerJet.lorentzVector.phi()-jet_regionIndex)/14)
+                for iPhi in range(18):
+                    # Phi-Ring
+                    etList.append(self.regionChain.regionEt[iPhi*14 + triggerJet.iEta])
+            etDeltas.append(puppiJet.lorentzVector.Et() - (triggerJet.lorentzVector.Et() + self.correctionpred(etList)))  #  + self.correctionpred()
         return etDeltas
     
-    def correctionpred(self):
-        coeff = -0.02962163 # -0.01653386 no
-        intercept = 13.546684132333427 # 17.227005180909135 no
-        return coeff * self.totalTP + intercept
+    def correctionpred(self, etList):
+        model = tf.keras.models.load_model('PhiRingSub-1l-u32-bs128-ks7-s1-flatten_NN')
+        if etList == []:
+            return 0
+        else: 
+            x = np.asarray(etList).reshape(-1, 18, 1)
+            y = np.asarray(model.predict(x)).astype(float)
+            return y[0][0]
+        
 
 
 def createTriggerAndPuppiJets(theChain):
@@ -122,7 +136,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'offset_trialet100000.h5'
+hdf5_file_name = 'CNNa_Trial.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -164,7 +178,7 @@ def makeAverageHistograms(energyDeltaHist, nMatchedPairsHist, nameTitle):
     return averageHist
 
 def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
-    outputTable = Table(title="Average(Pupppi ET - Trigger ET)")
+    outputTable = Table(title="Average(Puppi ET - Trigger ET)")
     outputTable.add_column(columnName, justify="center")
     outputTable.add_column("Energy Delta", justify="center")
 
@@ -263,7 +277,7 @@ def main(args):
         maxTPEnergy,
     )
 
-    for i in track(range(100000), description="Scrolling events"): #numEvents
+    for i in track(range(1000), description="Scrolling events"): #numEvents
     #for i in track(range(100), description="scrolling events"):
         # Grab the event
         eventChain.GetEntry(i)
@@ -272,10 +286,11 @@ def main(args):
 
         if event.matchedJets == []: #if we have no matched jets, we're done here
             continue
-
+        
         #let's figure out how many matched jets we have and the number of TPs
         nMatchedJets = len(event.matchedJets)
         totalTPs = event.totalTP
+        totalTPEnergy = event.totalTPEnergy
 
         #fill the histogram with the number of jets we got for this number of TPs
         nMatchedPairsHist.Fill(totalTPs, nMatchedJets)
@@ -288,7 +303,6 @@ def main(args):
         #now let's fill the histogram
         energyDeltasHist.Fill(totalTPs, energyDelta)
 
-        totalTPEnergy = event.totalTPEnergy
         nMatchedPairs_TPET_Hist.Fill(totalTPEnergy, nMatchedJets)
         energyDeltas_TPET_Hist.Fill(totalTPEnergy, energyDelta)
     

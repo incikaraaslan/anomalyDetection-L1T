@@ -7,6 +7,10 @@ from functools import partial
 import matplotlib.pyplot as plt 
 import pandas as pd
 from evalNN import eval_metric
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import StandardScaler
+from array import array
 
 # Prevent Keras from using all vram when running with GPU
 """gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -75,7 +79,7 @@ trainHistory = model.fit(
     x_train, 
     y_train, 
     batch_size = 128, 
-    epochs = 10,
+    epochs = 20,
     validation_data=(x_val,y_val)
 )
 
@@ -90,6 +94,10 @@ print(mse_test, rmse_test, y_pred)
 # Draw Learning Curve
 eval_metric(model, trainHistory)
 plt.savefig("learningCurvecircleSub-1l-u32-bs128-ks7-s1-flatten.png")
+print("Mean:" + str(np.mean(y_test))+ " , Predicted Mean: " + str(np.mean(y_pred)) + '\n')
+print("Median:" + str(np.median(y_test))+ " , Predicted Median: " + str(np.median(y_pred)) + '\n')
+"""print("Total Prediction MSE: " + str(mean_squared_error(y_test, y_pred)) + '\n')
+print("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(y_test, y_pred))) + '\n')"""
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
 tf.keras.utils.plot_model(model, to_file="circleSub-1l-u32-bs128-ks7-s1-flatten.png", show_shapes=True)
