@@ -208,6 +208,10 @@ class iEtaiPhiBinCollection():
     
     def iEta(self, eta: float) -> int:
         theBin = self.findAppropriateEtaBin(value=eta)
+        if eta > 5.0:
+            return 21
+        elif eta < -5.0:
+            return 0
         if theBin != None:
             return theBin.getValue()
         else:

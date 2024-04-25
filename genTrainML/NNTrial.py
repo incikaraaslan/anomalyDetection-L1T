@@ -93,14 +93,17 @@ class eventData():
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
-            etDeltas.append(puppiJet.lorentzVector.Et()-(triggerJet.lorentzVector.Et())) #  + self.correctionpred()
+            etDeltas.append(puppiJet.lorentzVector.Et()-(triggerJet.lorentzVector.Et() + self.correctionpred())) #  + self.correctionpred()
         return etDeltas
     
-    """def correctionpred(self):
-        model = tf.keras.models.load_model('simplethesis_NN')
+    def correctionpred(self):
+        model = tf.keras.models.load_model('simplethesisggHbb_NN')
         x = np.column_stack((self.totalTP, self.totalTPEnergy))
+        x = x.reshape((-1, 2, 1))
         y = np.asarray(model.predict(x)).astype(float)
-        return y[0][0]"""
+        print(x, y[0][0])
+        exit()
+        return y[0][0]
 
 
 def createTriggerAndPuppiJets(theChain):
@@ -123,7 +126,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'NN_orig.h5'
+hdf5_file_name = 'fooNNggHbb_trial.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):

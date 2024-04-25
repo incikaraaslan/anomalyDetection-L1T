@@ -116,7 +116,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'offset_dataset.h5'
+hdf5_file_name = 'offsetggHtobb_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -174,14 +174,15 @@ def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
 # --> get the offset of these two --> create dataset or lookup table with bins vs. offset
 def main(args):
     filePaths = [
-        "/hdfs/store/user/aloelige/EphemeralZeroBias0/SNAIL_2023RunD_EZB0_18Oct2023/231018_205626/",
+        "/hdfs/store/user/aloelige/GluGluHToBB_M-125_TuneCP5_13p6TeV_powheg-pythia8/SNAIL_ggHtobb_22Apr2024/240422_172448/"
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias0/SNAIL_2023RunD_EZB0_18Oct2023/231018_205626/",
         # "/hdfs/store/user/aloelige/EphemeralZeroBias2/SNAIL_2023RunD_EZB2_18Oct2023/231018_205829/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias2/SNAIL_2023RunD_EZB2_19Oct2023/231019_080917/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias3/SNAIL_2023RunD_EZB3_18Oct2023/231018_205910/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias4/SNAIL_2023RunD_EZB4_18Oct2023/231018_205953/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias5/SNAIL_2023RunD_EZB5_18Oct2023/231018_210031/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias6/SNAIL_2023RunD_EZB6_18Oct2023/231018_210109/",
-        "/hdfs/store/user/aloelige/EphemeralZeroBias7/SNAIL_2023RunD_EZB7_19Oct2023/231019_080954/",
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias2/SNAIL_2023RunD_EZB2_19Oct2023/231019_080917/",
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias3/SNAIL_2023RunD_EZB3_18Oct2023/231018_205910/",
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias4/SNAIL_2023RunD_EZB4_18Oct2023/231018_205953/",
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias5/SNAIL_2023RunD_EZB5_18Oct2023/231018_210031/",
+        #"/hdfs/store/user/aloelige/EphemeralZeroBias6/SNAIL_2023RunD_EZB6_18Oct2023/231018_210109/",
+        # "/hdfs/store/user/aloelige/EphemeralZeroBias7/SNAIL_2023RunD_EZB7_19Oct2023/231019_080954/",
     ]
     
     allFiles = []

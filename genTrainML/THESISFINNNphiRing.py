@@ -22,28 +22,20 @@ if gpus:
     print(e)"""
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiringsubcircleofphi_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/phiring_dataset.h5'
 f = h5py.File(directory, 'r')
 #print(list(f.keys()))
 
-x_test = f['PhiRingEttestshuf'][:]
-x_train = f['PhiRingEttrainshuf'][:]
-x_train = x_train.reshape(-1, 18, 1) #(1, 18, 1) # len() = 7573
-x_test = x_test.reshape(-1, 18, 1) # len() = 1247"""
-print(np.shape(x_train), np.shape(x_test))
-print(x_train)
+x = f['PhiRingEt'][:]
+x = x.reshape(-1, 18, 1) #(1, 18, 1) # len() = 7573
 
-
-y_test = f['PuppiTrigEtDifftestshuf'][:]
-y_train = f['PuppiTrigEtDifftrainshuf'][:]
-y_train = y_train.reshape(-1, 1, 1)
-y_test = y_test.reshape(-1, 1, 1)
-print(np.shape(y_train), np.shape(y_test))
-print(y_train)
+y = f['PuppiTrigEtDiff'][:]
+y = y.reshape(-1, 1, 1)
 f.close()
 
 
-x_train, x_val, y_train, y_val = skms.train_test_split(x_train, y_train, test_size=0.10, train_size = 0.90, random_state =1234)
+x_train, x_test, y_train, y_test = skms.train_test_split(x, y, test_size=0.20, train_size = 0.80, random_state =1234)
+x_test, x_val, y_test, y_val = skms.train_test_split(x_test, y_test, test_size=0.10, train_size = 0.90, random_state =1234)
 """num_rows = len(x_test)
 num_columns = len(x_test[0]) 
 shape = (num_rows, num_columns)
@@ -78,7 +70,7 @@ model.compile(loss = "mean_squared_error", metrics = ["RootMeanSquaredError"])
 trainHistory = model.fit(
     x_train, 
     y_train, 
-    batch_size = 128, 
+    batch_size = 32, 
     epochs = 20,
     validation_data=(x_val,y_val)
 )
@@ -93,13 +85,13 @@ print(mse_test, rmse_test, y_pred)
 
 # Draw Learning Curve
 eval_metric(model, trainHistory)
-plt.savefig("learningCurvecircleSub-1l-u32-bs128-ks7-s1-flatten.png")
+plt.savefig("learningCurvephiSubt-1l-u32-bs32-ks7-s1-flatten.png")
 print("Mean:" + str(np.mean(y_test))+ " , Predicted Mean: " + str(np.mean(y_pred)) + '\n')
 print("Median:" + str(np.median(y_test))+ " , Predicted Median: " + str(np.median(y_pred)) + '\n')
 """print("Total Prediction MSE: " + str(mean_squared_error(y_test, y_pred)) + '\n')
 print("Total Prediction RMSE: " + str(math.sqrt(mean_squared_error(y_test, y_pred))) + '\n')"""
 
 # Calling `save('my_model')` creates a SavedModel folder `my_model`.
-tf.keras.utils.plot_model(model, to_file="circleSub-1l-u32-bs128-ks7-s1-flatten.png", show_shapes=True)
-model.save("CircleRingSub-1l-u32-bs128-ks7-s1-flatten_NN")
+tf.keras.utils.plot_model(model, to_file="phiSubt-1l-u32-bs32-ks7-s1-flatten.png", show_shapes=True)
+model.save("PhiRingSubt-1l-u32-bs32-ks7-s1-flatten_NN")
 print("Done!")

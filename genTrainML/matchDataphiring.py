@@ -32,6 +32,7 @@ class jet():
         self.lorentzVector.SetPtEtaPhiM(self.pt, self.eta, self.phi, self.m)
     
         self.iEta, self.iPhi = iEtaiPhiMap.iEtaiPhi(self.eta, self.phi)
+        self.adjustediEta = self.iEta - 4
 
     # def DeltaR(self, otherJet) -> float:
     #     return self.lorentzVector.DeltaR(otherJet.lorentzVector)
@@ -89,7 +90,45 @@ class eventData():
         self.totalTPEnergy = 0.0
         self.totalTPEnergy += sum(self.chain.CaloTP.ecalTPet)
         self.totalTPEnergy += sum(self.chain.CaloTP.hcalTPet)
+        self.regions = np.zeros((18,14))
+        self.circleregions = np.zeros(9)
+        for i in range(18):
+            for j in range(14):
+                self.regions[i][j] = list(theChain.regionEt)[i*14+j]
+    
+    def phiRing(self, eta):
+        return self.regions[:, eta]
+    
+    """def circleRing(self, phi, eta):
+        grid_rows = 18
+        grid_columns = 14
 
+        etList = []
+        if 0 <= phi < grid_rows and 0 <= eta < grid_columns:
+            # Comment out for Donut
+            center_index = phi * grid_columns + eta
+            etList.append(self.regions[phi,eta])
+            surrounding_indices = [
+                (phi - 1) * grid_columns + eta,  # Up
+                (phi + 1) * grid_columns + eta,  # Down
+                phi * grid_columns + eta - 1,     # Left
+                phi * grid_columns + eta + 1,     # Right
+                (phi - 1) * grid_columns + eta - 1,  # Up-Left
+                (phi - 1) * grid_columns + eta + 1,  # Up-Right
+                (phi + 1) * grid_columns + eta - 1,  # Down-Left
+                (phi + 1) * grid_columns + eta + 1   # Down-Right
+            ]
+            for index in surrounding_indices:
+                if 0 <= index < grid_rows * grid_columns:
+                    etList.append(self.regions[index])
+                else:
+                    etList.append(0)
+        else:
+            # Point is out of grid bounds, append zeros to etList
+            for _ in range(9):  # Append 9 zeros to etList
+                etList.append(0)
+        return etList"""
+    
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
@@ -116,7 +155,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'nnggHbb_dataset.h5'
+hdf5_file_name = 'phiringggHtobb_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -158,7 +197,7 @@ def makeAverageHistograms(energyDeltaHist, nMatchedPairsHist, nameTitle):
     return averageHist
 
 def makeDebugTable(averagePlot, minX, maxX, nBins, columnName):
-    outputTable = Table(title="Average(Puppi ET - Trigger ET)")
+    outputTable = Table(title="Average(Pupppi ET - Trigger ET)")
     outputTable.add_column(columnName, justify="center")
     outputTable.add_column("Energy Delta", justify="center")
 
@@ -257,11 +296,9 @@ def main(args):
         minTPEnergy,
         maxTPEnergy,
     )
-
-    eDs =[]
-    totalTPs = []
-    totalTPEnergy = []
-
+    phiRing = []
+    circleRing = []
+    delpuppitrig = []
     for i in track(range(100000), description="Scrolling events"): #numEvents
     #for i in track(range(100), description="scrolling events"):
         # Grab the event
@@ -273,17 +310,20 @@ def main(args):
             continue
 
         #let's figure out how many matched jets we have and the number of TPs
-        eDs += event.findMatchedJetEnergyDifferences()
-        for i in range(len(event.matchedJets)):
-            totalTPs.append(event.totalTP)
-            totalTPEnergy.append(event.totalTPEnergy)
-    
-    # Write File
-    hdf5_file.create_dataset('TPno', data=np.asarray(totalTPs))
-    hdf5_file.create_dataset('TPet', data=np.asarray(totalTPEnergy))
-    hdf5_file.create_dataset('DelPUPPITRIG', data=np.asarray(eDs))
-    hdf5_file.close()
+        nMatchedJets = len(event.matchedJets)
+        
+        if nMatchedJets != 0:
+            for triggerJet, puppiJet in event.matchedJets:
+                if triggerJet.adjustediEta < 0 or triggerJet.adjustediEta > 13: # only barrel regions
+                    continue
+                else:
+                    phiRing.append(event.phiRing(triggerJet.adjustediEta))
+                    # circleRing.append(event.circleRing(triggerJet.iPhi, triggerJet.adjustediEta))
+                    delpuppitrig.append(puppiJet.pt - triggerJet.pt)
 
+    hdf5_file.create_dataset('PhiRingEt', data=np.asarray(phiRing))
+    hdf5_file.create_dataset('PuppiTrigEtDiff', data=np.asarray(delpuppitrig))
+    hdf5_file.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Make Jet Delta vs nTPs")

@@ -25,7 +25,7 @@ import math
 np.random.seed(1234)
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/offset_dataset.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/offsetggHtobb_dataset.h5'
 f = h5py.File(directory, 'r')
 
 y = f['AvgDelOffsettp'][:]
@@ -65,7 +65,7 @@ plt.xlabel('# HCAL + ECAL TP')
 plt.ylabel(f'Average $\Delta(PUPPI P_T, TRIG P_T)$')
 plt.title('Linear Regression Fit')
 plt.legend()
-plt.savefig('offset_plot.png')
+plt.savefig('offsetggHbb_plot.png')
 plt.show()
 
 # Results

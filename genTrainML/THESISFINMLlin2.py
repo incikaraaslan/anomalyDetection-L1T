@@ -17,12 +17,12 @@ ROOT.gStyle.SetOptStat(0)
 np.random.seed(1234)
 
 # Read files
-directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/offset_dataset100000.h5'
+directory = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/offsetggHtobb_dataset.h5'
 f = h5py.File(directory, 'r')
 
-y_actual = f['AvgDelOffsettp'][:]
-x = f['TPno'][:]
-y_actualerr = f['AvgDelOffsettperr'][:]
+y_actual = f['AvgDelOffsettpet'][:]
+x = f['TPet'][:]
+y_actualerr = f['AvgDelOffsettpeterr'][:]
 non_zero_index_axis = np.argmax(y_actual != 0, axis=0)
 """cut_indices = np.where(x < 1250)[0]"""
 x = x[non_zero_index_axis:]
@@ -40,8 +40,8 @@ linfit = ROOT.TGraphErrors(100)
 
 # Create a linear regression model to predict y-values
 model_lr = LinearRegression()
-# mod_err = [0 if y_actualerr[i] == 0 else 1/y_actualerr[i] for i in range(len(y_actualerr))]
-model_lr.fit(x, y_actual, 1/y_actualerr)
+mod_err = [0 if y_actualerr[i] == 0 else 1/y_actualerr[i] for i in range(len(y_actualerr))]
+model_lr.fit(x, y_actual, mod_err)
 
 # Predict y-values using the linear regression model
 y_predicted = model_lr.predict(x)
@@ -59,7 +59,7 @@ lingraph.SetMarkerColor(ROOT.kRed)
 lingraph.SetMarkerSize(1)
 lingraph.SetMarkerStyle(ROOT.kFullCircle) 
 lingraph.SetTitle("")
-lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs") # Number of HCAL+ECAL TPs #Total HCAL E_{T} + ECAL E_{T}
+lingraph.GetXaxis().SetTitle("Total HCAL E_{T} + ECAL E_{T}") # Number of HCAL+ECAL TPs #Total HCAL E_{T} + ECAL E_{T}
 lingraph.GetYaxis().SetTitle("Average Matched PUPPI p_{T}- Trigger Jet p_{T}")
 linfit.SetMarkerColor(ROOT.kBlue)
 linfit.SetLineWidth(3)
@@ -80,7 +80,7 @@ cmsLatex.SetNDC(True)
 cmsLatex.SetTextAlign(32)
 cmsLatex.SetTextColor(ROOT.kBlack) 
 cmsLatex.DrawLatex(0.9, 0.92, "#font[61]{CMS} #font[52]{Preliminary}")
-canvas.SaveAs("fooval.png")
+canvas.SaveAs("offsetggHbb_plotet.png")
 
 # Calculate the Mean Squared Error (MSE) of the corrected y-values
 print("Mean:" + str(np.mean(y_actual))+ " , Predicted Mean: " + str(np.mean(y_predicted)) + '\n')

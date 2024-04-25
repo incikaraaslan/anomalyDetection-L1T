@@ -25,26 +25,19 @@ x = f['TPno'][:]
 y_actualerr = f['AvgDelOffsettperr'][:]
 # non_zero_index_axis = np.argmax(y_actual != 0, axis=0)
 
-directory2 = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/NNggHbb_trial.h5'
+directory2 = '/afs/hep.wisc.edu/home/incik/CMSSW_13_1_0_pre2/src/genTrainML/output/CNNggHbbphia_Trial.h5'
 f2 = h5py.File(directory2, 'r')
 y_fit = f2['AvgDelOffsettp'][:]
 xfit = f2['TPno'][:]
 y_fiterr = f2['AvgDelOffsettperr'][:]
-"""cut_indices = np.where(x < 1250)[0]"""
-non_zero_index_axis = np.argmax(y_fit != 0, axis=0)
-x = x[non_zero_index_axis:non_zero_index_axis+37]
-y_actual = y_actual[non_zero_index_axis:non_zero_index_axis+37]
-y_actualerr = y_actualerr[non_zero_index_axis:non_zero_index_axis+37]
-xfit = xfit[non_zero_index_axis:non_zero_index_axis+37]
-y_fit = y_fit[non_zero_index_axis:non_zero_index_axis+37]
-y_fiterr = y_fiterr[non_zero_index_axis:non_zero_index_axis+37]
-"""x = x[cut_indices]
-y_actual = y_actual[cut_indices]
-y_actualerr = y_actualerr[cut_indices]
-xfit = xfit[cut_indices]
-xfit = xfit[cut_indices]
-y_fiterr = y_fiterr[cut_indices]"""
 
+non_zero_index_axis = np.argmax(y_fit != 0, axis=0)
+x = x[non_zero_index_axis:]
+y_actual = y_actual[non_zero_index_axis:]
+y_actualerr = y_actualerr[non_zero_index_axis:]
+xfit = xfit[non_zero_index_axis:]
+y_fit = y_fit[non_zero_index_axis:]
+y_fiterr = y_fiterr[non_zero_index_axis:]
 
 # Create ROOT Histogram
 canvas = ROOT.TCanvas("canvas", "offsetfit", 800, 600)
@@ -67,7 +60,7 @@ lingraph.SetMarkerColor(ROOT.kRed)
 lingraph.SetMarkerSize(1)
 lingraph.SetMarkerStyle(ROOT.kFullCircle) 
 lingraph.SetTitle("")
-lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs") # HCAL+ECAL TP E_{T}, Number of HCAL+ECAL TPs
+lingraph.GetXaxis().SetTitle("Number of HCAL+ECAL TPs") # HCAL+ECAL E_{T}, Number of HCAL+ECAL TPs
 lingraph.GetYaxis().SetTitle("Average Matched PUPPI p_{T} - Trigger Jet p_{T}")
 linfit.SetMarkerStyle(20)
 linfit.SetMarkerColor(ROOT.kBlue)
@@ -76,7 +69,7 @@ linfit.SetMarkerStyle(ROOT.kFullCircle)
 
 lingraph.Draw("AP")
 linfit.Draw("P")
-line = ROOT.TLine(600, 0, 1500, 0) 
+line = ROOT.TLine(300, 0, 2150, 0) 
 line.SetLineStyle(ROOT.kDashed)  
 line.Draw("SAME")
 
@@ -88,7 +81,7 @@ leg.SetFillStyle(0)
 leg.Draw()
 
 yaxis = lingraph.GetYaxis() 
-yaxis.SetRangeUser(-50, 50)
+yaxis.SetRangeUser(-30, 50)
 """xaxis = lingraph.GetXaxis() 
 xaxis.SetRangeUser(200, 1000)"""
 # Add CMS label after drawing other elements
@@ -98,7 +91,7 @@ cmsLatex.SetNDC(True)
 cmsLatex.SetTextAlign(32)
 cmsLatex.SetTextColor(ROOT.kBlack) 
 cmsLatex.DrawLatex(0.9, 0.92, "#font[61]{CMS} #font[52]{Preliminary}")
-canvas.SaveAs("foo3ggHbb.png")
+canvas.SaveAs("foo13ggHbb.png")
 
 print("Mean:" + str(np.mean(y_actual))+ " , Predicted Mean: " + str(np.mean(y_fit)) + '\n')
 print("Median:" + str(np.median(y_actual))+ " , Predicted Median: " + str(np.median(y_fit)) + '\n')

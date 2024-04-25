@@ -12,7 +12,7 @@ import h5py
 
 tt = ["trainshuf", "testshuf"]
 
-hdf5_file_name = 'phiringsubcircleofphi_dataset.h5'
+hdf5_file_name = 'phiringsubphiring_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 counters = [0, 0, 0, 0, 0, 0]
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
@@ -59,18 +59,32 @@ def createMatchedAndUnmatchedJets(triggerJets, puppiJets, energyfortrigs):
     return matchedJets, unmatchedTriggerJets, unmatchedPuppiJets, et_fortrigmatched
 
 def circleofPhi(iPhi, jet_regionIndex):
-    if iPhi*14 <= (iPhi*14 + jet_regionIndex) <= iPhi*14 + 13:
-        etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
-        if 0 <= ((iPhi-1)*14 + jet_regionIndex) < len(chains['regionEt'].regionEt):
-            etList.append(chains['regionEt'].regionEt[(iPhi-1)*14 + jet_regionIndex])
-        else:
-            etList.append(0)
-        if 0 <= ((iPhi+1)*14 + jet_regionIndex) < len(chains['regionEt'].regionEt):
-            etList.append(chains['regionEt'].regionEt[(iPhi+1)*14 + jet_regionIndex])
-        else:
-            etList.append(0)
+    grid_rows = 18
+    grid_columns = 14
+
+    if 0 <= iPhi < grid_rows and 0 <= jet_regionIndex < grid_columns:
+        # Comment out for Donut
+        center_index = iPhi * grid_columns + jet_regionIndex
+        etList.append(chains['regionEt'].regionEt[center_index])
+        surrounding_indices = [
+            (iPhi - 1) * grid_columns + jet_regionIndex,  # Up
+            (iPhi + 1) * grid_columns + jet_regionIndex,  # Down
+            iPhi * grid_columns + jet_regionIndex - 1,     # Left
+            iPhi * grid_columns + jet_regionIndex + 1,     # Right
+            (iPhi - 1) * grid_columns + jet_regionIndex - 1,  # Up-Left
+            (iPhi - 1) * grid_columns + jet_regionIndex + 1,  # Up-Right
+            (iPhi + 1) * grid_columns + jet_regionIndex - 1,  # Down-Left
+            (iPhi + 1) * grid_columns + jet_regionIndex + 1   # Down-Right
+        ]
+        for index in surrounding_indices:
+            if 0 <= index < grid_rows * grid_columns:
+                etList.append(chains['regionEt'].regionEt[index])
+            else:
+                etList.append(0)
     else:
-        etList.append(0)
+        # Point is out of grid bounds, append zeros to etList
+        for _ in range(9):  # Append 9 zeros to etList
+            etList.append(0)
 
 for c in tqdm(range(len(tt))):
     print(tt[c])
@@ -96,7 +110,7 @@ for c in tqdm(range(len(tt))):
         counters[c] += 1
 
         # Match Jet with PUPPI
-        for i in tqdm(range(chains['puppiJet'].GetEntries())): # chains['genJet'].GetEntries() - 100000 events if you can
+        for i in tqdm(range(10)): #chains['puppiJet'].GetEntries(), chains['genJet'].GetEntries() - 100000 events if you can
             trigJetptarr = []
             puppiJetptarr = []
             et_fortrig = []
@@ -128,28 +142,26 @@ for c in tqdm(range(len(tt))):
                     trigiPhi = round((chains['trigJet'].jetIPhi[j]-jet_regionIndex)/14)
                     for iPhi in range(18):
                         # Phi-Ring
-                        """etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])"""
-                    
+                        etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
+                        print(etList)
                         # Circle around Jet Hit
-                        if iPhi == trigiPhi:
+                        """if iPhi == trigiPhi:
                             # a = np.asarray(chains['regionEt'].regionEt).reshape(14,18)
                             # etList.append(chains['regionEt'].regionEt[iPhi*14 + jet_regionIndex])
                             circleofPhi(iPhi, jet_regionIndex)
-                            circleofPhi(iPhi, jet_regionIndex + 1)
-                            circleofPhi(iPhi, jet_regionIndex - 1)
                             # print(etList)
                         else:
-                            continue
-                    
+                            continue"""
                     et_fortrig.append(etList)
                     counters[c+2] += 1
                     # If no specific circle
-                    """if etList == []:
+                    if etList == []:
+                        continue
                         print("Empty:")
                         print(chains['trigJet'].jetRawEt[j] * 0.5 ,chains['trigJet'].jetEta[j], chains['trigJet'].jetPhi[j])
                     else:
                         et_fortrig.append(etList)
-                        counters[c+2] += 1"""
+                        counters[c+2] += 1
                 else:
                     continue
 
@@ -181,14 +193,14 @@ for c in tqdm(range(len(tt))):
         for b in range(len(tet_fortrigmatched[a])):
             x.append(tet_fortrigmatched[a][b])
     
-    x = np.array(x, dtype=np.float64)
+    # x = np.array(x, dtype=np.float64)
     # Construct the Output/y/Goal: difference between the uncalibrated trigger jet pt, and the PUPPI Pt
     y = []
     for i in range(len(tcg_matched)):
         for j in range(len(tet_fortrigmatched[i])):
             y.append(tcg_matched[i][0][1].Pt() - tcg_matched[i][0][0].Pt())
 
-    y = np.array(y, dtype=np.float64)
+    # y = np.array(y, dtype=np.float64)
 
     print(len(y), len(x))
     print(y, x)

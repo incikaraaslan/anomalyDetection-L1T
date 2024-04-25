@@ -42,7 +42,7 @@ class jet():
         deltaEta = self.eta - otherJet.eta
         deltaR = math.sqrt(deltaPhi**2 + deltaEta**2)
         return deltaR
-
+genTrainML/matchDatatotal.py
 class puppiJet(jet):
     def __init__(self, theChain: ROOT.TChain, entryNum: int):
         super().__init__(
