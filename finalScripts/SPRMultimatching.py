@@ -99,7 +99,7 @@ class eventData():
     def phiRing(self, eta):
         return self.regions[:, eta]
     
-    def circleRing(self, phi, eta):
+    """def circleRing(self, phi, eta):
         grid_rows = 18
         grid_columns = 14
 
@@ -127,7 +127,7 @@ class eventData():
             # Point is out of grid bounds, append zeros to etList
             for _ in range(9):  # Append 9 zeros to etList
                 etList.append(0)
-        return etList
+        return etList"""
     
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
@@ -155,7 +155,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'phiringggHtobb_dataset.h5'
+hdf5_file_name = 'ggHtobbphi_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -299,6 +299,9 @@ def main(args):
     phiRing = []
     circleRing = []
     delpuppitrig = []
+    CICADAregions = []
+    totalTP = []
+    totalTPET = []
     for i in track(range(100000), description="Scrolling events"): #numEvents
     #for i in track(range(100), description="scrolling events"):
         # Grab the event
@@ -318,10 +321,16 @@ def main(args):
                     continue
                 else:
                     phiRing.append(event.phiRing(triggerJet.adjustediEta))
-                    circleRing.append(event.circleRing(triggerJet.iPhi, triggerJet.adjustediEta))
+                    CICADAregions.append(event.regions)
+                    totalTP.append(event.totalTP)
+                    totalTPET.append(event.totalTPEnergy)
+                    # circleRing.append(event.circleRing(triggerJet.iPhi, triggerJet.adjustediEta))
                     delpuppitrig.append(puppiJet.pt - triggerJet.pt)
 
     hdf5_file.create_dataset('PhiRingEt', data=np.asarray(phiRing))
+    hdf5_file.create_dataset('TPno', data=np.asarray(totalTP))
+    hdf5_file.create_dataset('TPet', data=np.asarray(totalTPET))
+    hdf5_file.create_dataset('CICADAEt', data=np.asarray(CICADAregions))
     hdf5_file.create_dataset('PuppiTrigEtDiff', data=np.asarray(delpuppitrig))
     hdf5_file.close()
 

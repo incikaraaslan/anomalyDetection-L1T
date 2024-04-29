@@ -32,7 +32,6 @@ class jet():
         self.lorentzVector.SetPtEtaPhiM(self.pt, self.eta, self.phi, self.m)
     
         self.iEta, self.iPhi = iEtaiPhiMap.iEtaiPhi(self.eta, self.phi)
-        self.adjustediEta = self.iEta - 4
 
     # def DeltaR(self, otherJet) -> float:
     #     return self.lorentzVector.DeltaR(otherJet.lorentzVector)
@@ -90,45 +89,7 @@ class eventData():
         self.totalTPEnergy = 0.0
         self.totalTPEnergy += sum(self.chain.CaloTP.ecalTPet)
         self.totalTPEnergy += sum(self.chain.CaloTP.hcalTPet)
-        self.regions = np.zeros((18,14))
-        self.circleregions = np.zeros(9)
-        for i in range(18):
-            for j in range(14):
-                self.regions[i][j] = list(theChain.regionEt)[i*14+j]
-    
-    def phiRing(self, eta):
-        return self.regions[:, eta]
-    
-    def circleRing(self, phi, eta):
-        grid_rows = 18
-        grid_columns = 14
 
-        etList = []
-        if 0 <= phi < grid_rows and 0 <= eta < grid_columns:
-            # Comment out for Donut
-            center_index = phi * grid_columns + eta
-            etList.append(self.regions[phi,eta])
-            surrounding_indices = [
-                (phi - 1) * grid_columns + eta,  # Up
-                (phi + 1) * grid_columns + eta,  # Down
-                phi * grid_columns + eta - 1,     # Left
-                phi * grid_columns + eta + 1,     # Right
-                (phi - 1) * grid_columns + eta - 1,  # Up-Left
-                (phi - 1) * grid_columns + eta + 1,  # Up-Right
-                (phi + 1) * grid_columns + eta - 1,  # Down-Left
-                (phi + 1) * grid_columns + eta + 1   # Down-Right
-            ]
-            for index in surrounding_indices:
-                if 0 <= index < grid_rows * grid_columns:
-                    etList.append(self.regions[index])
-                else:
-                    etList.append(0)
-        else:
-            # Point is out of grid bounds, append zeros to etList
-            for _ in range(9):  # Append 9 zeros to etList
-                etList.append(0)
-        return etList
-    
     def findMatchedJetEnergyDifferences(self):
         etDeltas = []
         for triggerJet, puppiJet in self.matchedJets:
@@ -155,7 +116,7 @@ def createTriggerAndPuppiJets(theChain):
 # At the end of this we hand back matched pairs, and unmatched jets
 
 # Write on a File
-hdf5_file_name = 'phiringggHtobb_dataset.h5'
+hdf5_file_name = 'offsetggHtobb_dataset.h5'
 hdf5_file = h5py.File("output/"+ hdf5_file_name, 'w')
 
 def createMatchedAndUnmatchedJets(triggerJets, puppiJets):
@@ -296,9 +257,7 @@ def main(args):
         minTPEnergy,
         maxTPEnergy,
     )
-    phiRing = []
-    circleRing = []
-    delpuppitrig = []
+
     for i in track(range(100000), description="Scrolling events"): #numEvents
     #for i in track(range(100), description="scrolling events"):
         # Grab the event
@@ -311,19 +270,99 @@ def main(args):
 
         #let's figure out how many matched jets we have and the number of TPs
         nMatchedJets = len(event.matchedJets)
-        
-        if nMatchedJets != 0:
-            for triggerJet, puppiJet in event.matchedJets:
-                if triggerJet.adjustediEta < 0 or triggerJet.adjustediEta > 13: # only barrel regions
-                    continue
-                else:
-                    phiRing.append(event.phiRing(triggerJet.adjustediEta))
-                    circleRing.append(event.circleRing(triggerJet.iPhi, triggerJet.adjustediEta))
-                    delpuppitrig.append(puppiJet.pt - triggerJet.pt)
+        totalTPs = event.totalTP
 
-    hdf5_file.create_dataset('PhiRingEt', data=np.asarray(phiRing))
-    hdf5_file.create_dataset('PuppiTrigEtDiff', data=np.asarray(delpuppitrig))
+        #fill the histogram with the number of jets we got for this number of TPs
+        nMatchedPairsHist.Fill(totalTPs, nMatchedJets)
+
+        #let's find the differences between matched jets in the event data
+        energyDeltas = event.findMatchedJetEnergyDifferences()
+        #let's find the total energy delta
+        energyDelta = sum(energyDeltas)
+        
+        #now let's fill the histogram
+        energyDeltasHist.Fill(totalTPs, energyDelta)
+
+        totalTPEnergy = event.totalTPEnergy
+        nMatchedPairs_TPET_Hist.Fill(totalTPEnergy, nMatchedJets)
+        energyDeltas_TPET_Hist.Fill(totalTPEnergy, energyDelta)
+    
+    #then to get average, you divide the bins of the energy deltas hist
+    #by the bin contents of the number of matched jets hists
+    averageJetEnergyDelta = makeAverageHistograms(energyDeltasHist, nMatchedPairsHist, "AverageJetEnergyDelta")
+    averageJetEnergyDelta_TPET = makeAverageHistograms(energyDeltas_TPET_Hist, nMatchedPairs_TPET_Hist, "AverageJetEnergyDelta_TPET")
+    # loop over bins get the bin error, gen bin error of eD/ get bin content of nMatched
+    # ind errs on eD histogram, store it as a hdf5 dataset
+    y = []
+    y2 = []
+    x = []
+    x2 = []
+    yerr = []
+    y2err = []
+    for bin_num in range(1, nBins + 1):
+        bin_center = averageJetEnergyDelta.GetBinCenter(bin_num)
+        bin_content = averageJetEnergyDelta.GetBinContent(bin_num)
+        bin_centeret = averageJetEnergyDelta_TPET.GetBinCenter(bin_num)
+        bin_contentet = averageJetEnergyDelta_TPET.GetBinContent(bin_num)
+        if nMatchedPairsHist.GetBinContent(bin_num) != 0:
+            binerror = energyDeltasHist.GetBinError(bin_num) / nMatchedPairsHist.GetBinContent(bin_num)
+        else:
+            binerror = 0
+        if nMatchedPairs_TPET_Hist.GetBinContent(bin_num) != 0:
+            binerror2 = energyDeltas_TPET_Hist.GetBinError(bin_num) / nMatchedPairs_TPET_Hist.GetBinContent(bin_num)
+        else:
+            binerror2 = 0
+        
+        yerr.append(binerror)
+        y2err.append(binerror2)
+        x.append(bin_center)
+        x2.append(bin_centeret)
+        y.append(bin_content)
+        y2.append(bin_contentet)
+    
+    # Model Variables
+    x = np.asarray(x).reshape(-1, 1)
+    x2 = np.asarray(x).reshape(-1, 1)
+    y = np.asarray(y)
+    y2 = np.asarray(y2)
+
+
+    # Write File
+    hdf5_file.create_dataset('TPno', data=np.asarray(x))
+    hdf5_file.create_dataset('TPet', data=np.asarray(x2))
+    hdf5_file.create_dataset('AvgDelOffsettp', data=np.asarray(y))
+    hdf5_file.create_dataset('AvgDelOffsettpet', data=np.asarray(y2))
+    hdf5_file.create_dataset('AvgDelOffsettperr', data=np.asarray(yerr))
+    hdf5_file.create_dataset('AvgDelOffsettpeterr', data=np.asarray(y2err))
     hdf5_file.close()
+
+    # Plot
+    """plt.scatter(x2, y2, color='blue', label='Original Data')
+    plt.plot(x2, y_pred2, color='red', label='Linear Fit')
+    plt.xlabel('HCAL + ECAL TPET')
+    plt.ylabel(f'Average $\Delta(PUPPI P_T, TRIG P_T)$')
+    plt.title('Linear Regression Fit')
+    plt.legend()
+    plt.savefig('linear_regression_plot.png')
+    plt.show()"""
+    
+
+        
+    # print(x,y)
+
+
+    """makeDebugTable(averageJetEnergyDelta, minTPs, maxTPs, nBins, "nTPs")
+
+    makeDebugTable(averageJetEnergyDelta_TPET, minTPEnergy, maxTPEnergy, nBins, "Total TP Energy")        
+
+    outputFile = ROOT.TFile(args.outputFileName, "RECREATE")
+    nMatchedPairsHist.Write()
+    energyDeltasHist.Write()
+    averageJetEnergyDelta.Write()
+    
+    nMatchedPairs_TPET_Hist.Write()
+    energyDeltas_TPET_Hist.Write()
+    averageJetEnergyDelta_TPET.Write()"""
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Make Jet Delta vs nTPs")
